@@ -4,6 +4,7 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 
 fun View.gone(animate: Boolean = false, duration: Long = 500L) {
+    visibility = View.GONE
     if (animate) startAnimation(AlphaAnimation(1f, 0f).also { it.duration = duration })
 }
 

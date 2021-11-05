@@ -4,24 +4,34 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
+import android.view.ViewStub
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.api.Status
 import com.zyl315.animehunter.databinding.ActivitySearchBinding
+import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.util.invisible
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.util.visible
+import com.zyl315.animehunter.view.adapter.SearchAdapter
 import com.zyl315.animehunter.viewmodel.SearchViewModel
 
 class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     private var lastSearchTime: Long = System.currentTimeMillis()
     private lateinit var viewModel: SearchViewModel
+    private lateinit var searchAdapter: SearchAdapter
+    private lateinit var circleLoading: ViewStub
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
+        searchAdapter = SearchAdapter(this, viewModel.mSearchResultList)
         init()
+        observe()
     }
 
     override fun getBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
@@ -58,7 +68,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
                 ): Boolean {
                     if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                         if (v == null || v.text.toString().isBlank()) {
-                            showToast(message = R.string.input_cannot_be_empty)
+                            showToast(resId = R.string.input_cannot_be_empty)
                             return false
                         }
 
@@ -83,10 +93,28 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
             tvSearchCancel.setOnClickListener {
                 this@SearchActivity.finish()
             }
+
+
+            rvSearchResult.apply {
+                layoutManager = LinearLayoutManager(this@SearchActivity)
+                adapter = searchAdapter
+            }
         }
     }
 
+    private fun observe() {
+        viewModel.searchResultStatus.observe(this, Observer {
+            if (it == Status.Success) {
+                searchAdapter.notifyDataSetChanged()
+            } else {
+                showToast(resId = R.string.get_data_failed)
+            }
+            mBinding.vsLoading.gone()
+        })
+    }
+
     fun search(keyWord: String) {
-        viewModel.getSearchData(keyWord, 1)
+        mBinding.vsLoading.visible()
+        viewModel.getSearchData(keyWord)
     }
 }

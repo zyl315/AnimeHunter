@@ -1,7 +1,7 @@
 package com.zyl315.animehunter.model.interfaces
 
-interface IBase {
+interface IBaseModel {
     companion object {
-        const val impName = "Base"
+        const val TAG = "BaseModel"
     }
 }
