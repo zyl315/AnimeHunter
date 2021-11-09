@@ -1,5 +1,6 @@
 package com.zyl315.animehunter.net.okhttp
 
+import com.zyl315.animehunter.util.AgeFans
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -11,8 +12,9 @@ class MyCookieJar : CookieJar {
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        for(cookie in cookies) {
+        for (cookie in cookies) {
             CookieStore.add(url, cookie)
         }
+        AgeFans.setCookie(url)
     }
 }

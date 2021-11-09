@@ -14,7 +14,7 @@ import com.zyl315.animehunter.view.activity.PlayActivity
 
 class SearchAdapter(
     private val activity: Activity,
-    private val dataList: List<BangumiBean>
+    private var dataList: List<BangumiBean>
 ) : BaseRvAdapter(dataList) {
 
 

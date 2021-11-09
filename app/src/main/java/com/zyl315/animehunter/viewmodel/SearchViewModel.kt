@@ -3,7 +3,7 @@ package com.zyl315.animehunter.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyl315.animehunter.api.Status
+import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.model.impls.agefans.SearchModel
 import com.zyl315.animehunter.model.interfaces.ISearchModelModel
@@ -16,7 +16,8 @@ class SearchViewModel : ViewModel() {
     }
 
     var mSearchResultList: MutableList<BangumiBean> = mutableListOf()
-    var searchResultStatus: MutableLiveData<Status> = MutableLiveData()
+    var mSearchResultSearchStatus: MutableLiveData<SearchStatus> = MutableLiveData()
+    var totalCount: String = "0"
     var pageNumber: Int = 1
     var searchWord = ""
 
@@ -27,12 +28,13 @@ class SearchViewModel : ViewModel() {
 
                 searchModel.getSearchData(keyWord, pageNumber).also {
                     mSearchResultList.addAll(it.first)
+                    totalCount = "共${it.second}"
                     searchWord = keyWord
-                    searchResultStatus.postValue(Status.Success)
+                    mSearchResultSearchStatus.postValue(SearchStatus.Success)
                 }
 
             } catch (e: Exception) {
-                searchResultStatus.postValue(Status.Failed)
+                mSearchResultSearchStatus.postValue(SearchStatus.Failed)
                 e.printStackTrace()
             }
 

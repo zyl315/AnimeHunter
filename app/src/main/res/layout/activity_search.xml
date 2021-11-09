@@ -81,7 +81,7 @@
             android:layout_marginStart="16dp"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:text="共50条记录" />
+            android:visibility="gone"/>
     </com.google.android.material.card.MaterialCardView>
 
     <ViewStub

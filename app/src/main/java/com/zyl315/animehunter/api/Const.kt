@@ -9,9 +9,9 @@ object Const {
     object AgeFans {
         var BASE_URL_LIST = listOf("https://www.agefans.vip", "https://www.agefans.live")
         var BASE_URL = BASE_URL_LIST[0]
-        var SEARCH_URL = "$BASE_URL/search"
-        var DETAIL_URL = "$BASE_URL/detail/%s"
-        var PLAY_URL = "$BASE_URL/_getplay?aid=%s&playindex=%s&epindex=%s&r=%s"
+        var SEARCH_URL = "$BASE_URL/search?query=%s&page=%s"
+        var DETAIL_URL = "$BASE_URL/play/%s"
+        var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
         var PLAY_REFERER = "$BASE_URL/play/%s?playid=%s"
     }
 

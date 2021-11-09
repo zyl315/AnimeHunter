@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.api.Status
+import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.databinding.ActivitySearchBinding
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.util.invisible
@@ -103,9 +103,13 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     }
 
     private fun observe() {
-        viewModel.searchResultStatus.observe(this, Observer {
-            if (it == Status.Success) {
+        viewModel.mSearchResultSearchStatus.observe(this, Observer {
+            if (it == SearchStatus.Success) {
                 searchAdapter.notifyDataSetChanged()
+                mBinding.tvSearchTip.apply {
+                    visible()
+                    text = viewModel.totalCount
+                }
             } else {
                 showToast(resId = R.string.get_data_failed)
             }

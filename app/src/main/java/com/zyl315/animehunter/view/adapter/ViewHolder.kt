@@ -17,7 +17,7 @@ class CoverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvPlotType: TextView = itemView.findViewById(R.id.tv_plotType)
 }
 
-class PlayUrlViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PlaySourceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvEpisode : TextView = itemView.findViewById(R.id.tv_episode)
 }
 
