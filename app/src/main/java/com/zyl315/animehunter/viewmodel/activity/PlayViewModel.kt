@@ -1,4 +1,4 @@
-package com.zyl315.animehunter.viewmodel
+package com.zyl315.animehunter.viewmodel.activity
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -50,8 +50,8 @@ class PlayViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 currentEpisodeBean = playSource[index]
-                if (currentEpisodeBean.originUrl == "") {
-                    currentEpisodeBean.originUrl = playModel.getPlayUrl(currentEpisodeBean.url)
+                if (currentEpisodeBean.url == "") {
+                    currentEpisodeBean.url = playModel.getPlayUrl(currentEpisodeBean.href)
                 }
                 playStatus.postValue(PlayStatus.GET_PLAY_URL_SUCCESS)
             } catch (e: IPCheckException) {

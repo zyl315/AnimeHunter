@@ -6,4 +6,4 @@ data class PlaySourceBean(val count: Int = 0, var select: Boolean = false) : Bas
     var episodeList: MutableList<EpisodeBean> = mutableListOf()
 }
 
-data class EpisodeBean(val title: String, val url: String, var originUrl: String = "") : BaseBean
+data class EpisodeBean(val title: String, val href: String, var url: String = "") : BaseBean

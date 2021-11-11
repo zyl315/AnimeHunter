@@ -15,6 +15,6 @@ class MyCookieJar : CookieJar {
         for (cookie in cookies) {
             CookieStore.add(url, cookie)
         }
-        AgeFans.setCookie(url)
+        AgeFans.updateCookie(url)
     }
 }

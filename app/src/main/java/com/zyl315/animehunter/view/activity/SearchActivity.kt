@@ -18,7 +18,7 @@ import com.zyl315.animehunter.util.invisible
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.util.visible
 import com.zyl315.animehunter.view.adapter.SearchAdapter
-import com.zyl315.animehunter.viewmodel.SearchViewModel
+import com.zyl315.animehunter.viewmodel.activity.SearchViewModel
 
 class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     private var lastSearchTime: Long = System.currentTimeMillis()

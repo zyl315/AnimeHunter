@@ -1,2 +1,3 @@
 rootProject.name = "AnimeHunter"
 include ':app'
+include ':player'

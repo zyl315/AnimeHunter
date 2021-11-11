@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.material.tabs.TabLayout
-import com.yc.kernel.inter.AbstractVideoPlayer
-import com.yc.video.controller.BaseVideoController
-import com.yc.video.player.VideoPlayer
-import com.yc.video.ui.view.BasisVideoController
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
@@ -17,13 +17,16 @@ import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.view.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.view.adapter.onItemClickListener
-import com.zyl315.animehunter.viewmodel.PlayViewModel
+import com.zyl315.animehunter.view.fragment.PlaySourceFragment
+import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private lateinit var viewModel: PlayViewModel
     private lateinit var mPlaySourceAdapter: PlaySourceAdapter
-    private lateinit var player: VideoPlayer<AbstractVideoPlayer>
-    private lateinit var playerController: BasisVideoController
+    private lateinit var playerView: PlayerView
+
+    //    private lateinit var playerController: BasisVideoController
+    private lateinit var player: ExoPlayer
 
     override fun getBinding() = ActivityPlayBinding.inflate(layoutInflater)
 
@@ -32,27 +35,32 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         initView()
         initData()
         initListener()
+        initPlayer()
         initObserve()
     }
 
     override fun onPause() {
         super.onPause()
-        player.pause()
+//        player.pause()
+//        playerView.pause()
     }
 
     override fun onResume() {
         super.onResume()
-        player.resume()
+
+//        playerView.resume()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         player.release()
+//        playerView.release()
     }
 
 
     override fun onBackPressed() {
-        if (!player.onBackPressed()) super.onBackPressed()
+//        if (!playerView.onBackPressed()) super.onBackPressed()
+        super.onBackPressed()
     }
 
 
@@ -63,11 +71,13 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         mPlaySourceAdapter = PlaySourceAdapter(viewModel.playSource, object : onItemClickListener {
             override fun onItemClick(position: Int) {
                 viewModel.getPlayUrl(position)
+                player.stop()
+//                playerView.release()
             }
         })
 
         mBinding.run {
-            player = playerView
+            this@PlayActivity.playerView = playerView
             rvPlayUrlList.apply {
                 layoutManager =
                     GridLayoutManager(this@PlayActivity, 3, RecyclerView.VERTICAL, false)
@@ -76,8 +86,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             tvName.text = viewModel.bangumi.name
             tvDescription.text = viewModel.bangumi.description
         }
-
-        initPlayer()
     }
 
     private fun initListener() {
@@ -97,6 +105,10 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
                 }
             })
+
+            tvExpand.setOnClickListener {
+                PlaySourceFragment().show(supportFragmentManager, "play_source")
+            }
         }
     }
 
@@ -128,6 +140,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 }
 
                 PlayStatus.GET_PLAY_URL_FAILED -> {
+                    viewModel.currentEpisodeBean.url = ""
                     showToast(resId = R.string.get_play_url_failed)
                 }
                 else -> {
@@ -141,16 +154,19 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun initPlayer() {
-        playerController = BasisVideoController(this)
-        player.setController(playerController)
+        player = ExoPlayer.Builder(this).build()
+        mBinding.playerView.player = player
+//        playerController = BasisVideoController(this)
+//        playerView.setController(playerController)
     }
 
 
     private fun starPlay(episodeBean: EpisodeBean) {
-        playerController.setTitle(episodeBean.title)
-        player.apply {
-            url = episodeBean.originUrl
-            if (isPlaying) replay(true) else start()
-        }
+//        playerController.setTitle(episodeBean.title)
+//        playerView.url = episodeBean.url
+//        playerView.start()
+        player.setMediaItem(MediaItem.fromUri(episodeBean.url))
+        player.prepare()
+        player.play()
     }
 }

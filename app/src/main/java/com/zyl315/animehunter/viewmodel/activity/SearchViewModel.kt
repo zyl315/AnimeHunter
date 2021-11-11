@@ -1,4 +1,4 @@
-package com.zyl315.animehunter.viewmodel
+package com.zyl315.animehunter.viewmodel.activity
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

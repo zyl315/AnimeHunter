@@ -7,12 +7,9 @@ import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.MaxRetryException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.model.interfaces.IPlayModelModel
-import com.zyl315.animehunter.net.okhttp.CookieStore
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.util.AgeFans.ipCheck
-import com.zyl315.animehunter.util.AgeFans.setCookie
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.net.URLDecoder
@@ -31,17 +28,23 @@ class PlayModel : IPlayModelModel {
 
         val document = Jsoup.parse(response.body?.string())
 
+        val defaultPlayIndex = document.getElementById("DEF_PLAYINDEX").run {
+            if (this != null) {
+                return@run this.data().toInt()
+            }
+            0
+        }
+
         document.getElementById("main0")?.getElementsByClass("movurl")
-            ?.forEach { it ->
+            ?.forEachIndexed() { index, it ->
                 val li = it.getElementsByTag("a")
                 if (li.size > 0) {
-                    val sourceBean = PlaySourceBean(li.size, it.attr("style") == "display:block")
+                    val sourceBean = PlaySourceBean(li.size, index == defaultPlayIndex)
                     li.forEach { a ->
                         sourceBean.episodeList.add(
                             EpisodeBean(a.attr("title"), a.attr("href"))
                         )
                     }
-
                     playSourceList.add(sourceBean)
                 }
             }
@@ -64,9 +67,8 @@ class PlayModel : IPlayModelModel {
         val response = client.newCall(request).execute()
 
         val body = response.body?.string() ?: ""
-        if (body == "err:timeout" || body == "") {
+        if (body == "err:timeout") {
             if (retryCount > 0) {
-                setCookie(request.url)
                 return getPlayUrl(url, retryCount - 1)
             } else {
                 throw MaxRetryException("Exceeded the maximum number of reconnections.")
@@ -83,7 +85,7 @@ class PlayModel : IPlayModelModel {
         val playEx = jsonObj.get("ex")
         val playId = jsonObj.getString("playid")
 
-        if (!playId.contains("<play>web")) {
+        if (!playId.contains("<play>web_mp4")) {
             throw UnSupportPlayTypeException()
         }
 
