@@ -2,19 +2,22 @@ package com.zyl315.animehunter.view.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.bean.age.EpisodeBean
+import com.zyl315.animehunter.util.dp
 
 class PlaySourceAdapter(
     private var dataList: List<EpisodeBean>,
-    var onItemClickListener: onItemClickListener
+    var onItemClickListener: onItemClickListener,
+    var orientation: Int
 ) : BaseRvAdapter(dataList) {
-    private var currentPosition: Int = 0
+    private var currentPosition: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return PlaySourceViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_play_url, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_play_episode, parent, false)
         )
     }
 
@@ -29,17 +32,29 @@ class PlaySourceAdapter(
                 itemView.setBackgroundResource(R.drawable.shape_rectangle_unselect)
             }
 
-            itemView.setOnClickListener {
-                currentPosition = position
-                onItemClickListener.onItemClick(position)
-                notifyDataSetChanged()
 
+            val layoutParams = holder.itemView.layoutParams
+            when (orientation) {
+                LinearLayoutManager.VERTICAL -> {
+                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                    if( layoutParams is ViewGroup.MarginLayoutParams) {
+                        layoutParams.setMargins(8.dp, 4.dp, 8.dp, 4.dp)
+                    }
+                    holder.itemView.layoutParams = layoutParams
+                }
+            }
+
+            itemView.setOnClickListener {
+                notifyItemChanged(position)
+                notifyItemChanged(currentPosition)
+                onItemClickListener.onItemClick(position)
+                currentPosition = position
             }
         }
     }
 
     fun updateDataList() {
-        currentPosition = 0
+        currentPosition = -1
         notifyDataSetChanged()
     }
 }

@@ -1,7 +1,11 @@
 package com.zyl315.animehunter
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import com.zyl315.exo.ExoMediaPlayerFactory
+import com.zyl315.player.player.VideoViewConfig
+import com.zyl315.player.player.VideoViewManager
 
 
 class App : Application() {
@@ -9,16 +13,17 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
-//
-//        VideoViewManager.setConfig(
-//            VideoPlayerConfig.newBuilder()
-//                .setPlayerFactory(IjkPlayerFactory.create())
-//                .setLogEnabled(true)
-//                .build()
-//        )
+
+        VideoViewManager.setConfig(
+            VideoViewConfig.newBuilder()
+                .setPlayerFactory(ExoMediaPlayerFactory.create())
+                .setLogEnabled(true)
+                .build()
+        )
     }
 
     companion object {
-        var context: Context? = null
+        @SuppressLint("StaticFieldLeak")
+        lateinit var context: Context
     }
 }
