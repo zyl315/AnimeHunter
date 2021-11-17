@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".view.activity.SearchActivity">
 
+    <ViewStub
+        android:id="@+id/vs_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cv_tip"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:layout="@layout/layout_circle_progress" />
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_header"
         android:layout_width="match_parent"
@@ -62,12 +72,6 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_search_result"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/cv_tip" />
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cv_tip"
         android:layout_width="match_parent"
@@ -81,14 +85,27 @@
             android:layout_marginStart="16dp"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </com.google.android.material.card.MaterialCardView>
 
-    <ViewStub
-        android:id="@+id/vs_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout="@layout/layout_circle_progress"/>
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/smartRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/cv_tip"
+        android:visibility="gone"
+        app:srlEnableLoadMoreWhenContentNotFull="false"
+        tools:visibility="visible">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_search_result"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.scwang.smart.refresh.footer.ClassicsFooter
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srlFinishDuration="0" />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 
 </RelativeLayout>

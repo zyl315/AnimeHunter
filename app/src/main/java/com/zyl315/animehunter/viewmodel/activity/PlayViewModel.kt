@@ -21,11 +21,13 @@ class PlayViewModel : ViewModel() {
 
     var playSourceList: MutableList<PlaySourceBean> = mutableListOf()
     var playSource: MutableList<EpisodeBean> = mutableListOf()
+    var currentSourceIndex = -1
+    var currentPlayPosition = -1
 
     val playStatus: MutableLiveData<PlayStatus> = MutableLiveData()
     val ipBanned: MutableLiveData<Boolean> = MutableLiveData()
+    val currentPlayTag: MutableLiveData<String> = MutableLiveData()
 
-    var currentSelect = -1
     lateinit var bangumi: BangumiBean
     lateinit var currentEpisodeBean: EpisodeBean
 
@@ -46,10 +48,10 @@ class PlayViewModel : ViewModel() {
     }
 
 
-    fun getPlayUrl(index: Int) {
+    fun getPlayUrl(position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                currentEpisodeBean = playSource[index]
+                setPlayUrl(position)
                 if (currentEpisodeBean.url == "") {
                     currentEpisodeBean.url = playModel.getPlayUrl(currentEpisodeBean.href)
                 }
@@ -64,10 +66,24 @@ class PlayViewModel : ViewModel() {
         }
     }
 
+    fun equalToCurrentPlayTag(): Boolean {
+        return currentPlayTag.value == getCurrentPlayTag()
+    }
+
+    fun getCurrentPlayTag(): String {
+        return "$currentSourceIndex$currentPlayPosition"
+    }
+
     fun setPlaySource(index: Int) {
-        if (index < 0 || index >= playSourceList.size || index == currentSelect) return
-        currentSelect = index
+        if (index < 0 || index >= playSourceList.size || index == currentSourceIndex) return
+        currentSourceIndex = index
         playSource.clear()
-        playSource.addAll(playSourceList[currentSelect].episodeList)
+        playSource.addAll(playSourceList[index].episodeList)
+    }
+
+    fun setPlayUrl(position: Int) {
+        currentEpisodeBean = playSource[position]
+        currentPlayPosition = position
+        currentPlayTag.postValue(getCurrentPlayTag())
     }
 }

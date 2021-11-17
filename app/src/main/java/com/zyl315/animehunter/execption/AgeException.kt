@@ -18,3 +18,10 @@ class UnSupportPlayTypeException : Exception {
     constructor(message: String) : super(message)
 }
 
+
+class NoModeDataException : Exception {
+    constructor() : super()
+
+    constructor(message: String) : super(message)
+}
+

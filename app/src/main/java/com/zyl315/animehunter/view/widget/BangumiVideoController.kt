@@ -3,12 +3,15 @@ package com.zyl315.animehunter.view.widget
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import com.zyl315.animehunter.R
 import com.zyl315.player.controller.GestureVideoController
 import com.zyl315.player.player.VideoView
@@ -18,11 +21,15 @@ import com.zyl315.ui.controller.component.*
 class BangumiVideoController : GestureVideoController, View.OnClickListener {
     lateinit var lockButton: ImageView
     lateinit var loadingProgress: ProgressBar
+    lateinit var speedTip: TextView
 
     private lateinit var prepareView: PrepareView
     private lateinit var errorView: ErrorView
     private lateinit var titleView: TitleView
     private lateinit var completeView: CompleteView
+    private lateinit var bottomControlView: BottomControlView
+
+    private var mPlaySpeed = 1f
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -41,13 +48,15 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
         lockButton = findViewById(R.id.lock)
         lockButton.setOnClickListener(this)
         loadingProgress = findViewById(R.id.loading)
+        speedTip = findViewById(R.id.speedTip)
 
         completeView = CompleteView(context)
         errorView = ErrorView(context)
         prepareView = PrepareView(context)
         titleView = TitleView(context)
+        bottomControlView = BottomControlView(context)
         addControlComponent(completeView, errorView, prepareView, titleView)
-        addControlComponent(VodControlView(context), GestureView(context))
+        addControlComponent(bottomControlView, GestureView(context))
     }
 
     fun setTitle(title: String) {
@@ -139,8 +148,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
 
             VideoView.STATE_PREPARING,
             VideoView.STATE_BUFFERING -> {
-                loadingProgress.visibility =
-                    VISIBLE
+                loadingProgress.visibility = VISIBLE
             }
             VideoView.STATE_PLAYBACK_COMPLETED -> {
                 loadingProgress.visibility = GONE
@@ -159,5 +167,38 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
         return if (mControlWrapper.isFullScreen) {
             stopFullScreen()
         } else super.onBackPressed()
+    }
+
+
+    override fun onLongPress(e: MotionEvent?) {
+        super.onLongPress(e)
+        if (!mControlWrapper.isPlaying || bottomControlView.isShowEpisodes()) return
+
+        speedTip.visibility = VISIBLE
+        mPlaySpeed = mControlWrapper.speed
+        mControlWrapper.speed = 2.0f
+    }
+
+
+    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+        if (bottomControlView.isShowEpisodes()) {
+            bottomControlView.hideEpisodes()
+            return true
+        }
+        return super.onSingleTapConfirmed(e)
+    }
+
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        when (event?.action) {
+            MotionEvent.ACTION_UP -> {
+                if (speedTip.isVisible) {
+                    speedTip.visibility = GONE
+                    mControlWrapper.speed = mPlaySpeed
+                    return true
+                }
+            }
+        }
+        return super.onTouchEvent(event)
     }
 }

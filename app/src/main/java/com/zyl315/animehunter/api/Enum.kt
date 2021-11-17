@@ -1,7 +1,7 @@
 package com.zyl315.animehunter.api
 
 enum class SearchStatus {
-    Normal, Failed, Success, Refresh
+    FAILED, SUCCESS, REFRESH_SUCCESS, REFRESH_FAILED, NO_MORE_DATA, LOAD_MORE_SUCCESS, LOAD_MORE_FAILED
 }
 
 enum class PlayStatus {

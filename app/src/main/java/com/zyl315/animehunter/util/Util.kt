@@ -62,7 +62,7 @@ object MyToast {
 
 object BackHandlerHelper {
     interface FragmentBackHandler {
-        fun onBackPress(): Boolean
+        fun onBackPressed(): Boolean
     }
 
     fun handleBackPress(fragmentManager: FragmentManager): Boolean {
@@ -88,10 +88,10 @@ object BackHandlerHelper {
         return handleBackPress(fragmentActivity.supportFragmentManager)
     }
 
-    fun isFragmentBackHandled(fragment: Fragment): Boolean {
+    private fun isFragmentBackHandled(fragment: Fragment): Boolean {
         return fragment.isVisible
                 && fragment.getUserVisibleHint() //for ViewPager
                 && fragment is FragmentBackHandler
-                && (fragment as FragmentBackHandler).onBackPress()
+                && (fragment as FragmentBackHandler).onBackPressed()
     }
 }

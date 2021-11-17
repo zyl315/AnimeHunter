@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.execption.NoModeDataException
 import com.zyl315.animehunter.model.impls.agefans.SearchModel
 import com.zyl315.animehunter.model.interfaces.ISearchModelModel
 import kotlinx.coroutines.Dispatchers
@@ -24,17 +25,20 @@ class SearchViewModel : ViewModel() {
     fun getSearchData(keyWord: String, refresh: Boolean = true) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                if (refresh) mSearchResultList.clear()
+                if (refresh) {
+                    pageNumber = 1
+                    mSearchResultList.clear()
+                }
 
                 searchModel.getSearchData(keyWord, pageNumber).also {
                     mSearchResultList.addAll(it.first)
                     totalCount = "共${it.second}"
                     searchWord = keyWord
-                    mSearchResultSearchStatus.postValue(SearchStatus.Success)
                 }
+                mSearchResultSearchStatus.postValue(SearchStatus.SUCCESS)
 
             } catch (e: Exception) {
-                mSearchResultSearchStatus.postValue(SearchStatus.Failed)
+                mSearchResultSearchStatus.postValue(if (refresh) SearchStatus.REFRESH_FAILED else SearchStatus.FAILED)
                 e.printStackTrace()
             }
 
@@ -42,7 +46,21 @@ class SearchViewModel : ViewModel() {
     }
 
 
-    fun loadMoreData(keyWord: String) {
-
+    fun loadMoreData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                if (searchWord.isBlank()) return@launch
+                searchModel.getSearchData(searchWord, pageNumber + 1).also {
+                    mSearchResultList.addAll(it.first)
+                    pageNumber += 1
+                }
+                mSearchResultSearchStatus.postValue(SearchStatus.LOAD_MORE_SUCCESS)
+            } catch (e: NoModeDataException) {
+                mSearchResultSearchStatus.postValue(SearchStatus.NO_MORE_DATA)
+            } catch (e: Exception) {
+                mSearchResultSearchStatus.postValue(SearchStatus.LOAD_MORE_FAILED)
+                e.printStackTrace()
+            }
+        }
     }
 }

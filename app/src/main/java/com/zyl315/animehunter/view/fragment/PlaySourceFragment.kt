@@ -13,8 +13,11 @@ import com.zyl315.animehunter.view.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.view.adapter.onItemClickListener
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 
-class PlaySourceFragment : BottomFragment<FragmentPlaySourceBinding>() {
+class PlaySourceFragment(override var popupGravity: Int) :
+    PopupFragment<FragmentPlaySourceBinding>() {
 
+    var backgroundColorId: Int? = null
+    var showCloseIcon: Boolean = true
     private lateinit var viewModel: PlayViewModel
 
     override fun onCreateView(
@@ -22,28 +25,39 @@ class PlaySourceFragment : BottomFragment<FragmentPlaySourceBinding>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
+        val view = super.onCreateView(inflater, container, savedInstanceState)?.apply {
+            backgroundColorId?.let { setBackgroundResource(it) }
+        }
 
         viewModel = ViewModelProvider(requireActivity()).get(PlayViewModel::class.java)
+
+        val currentPosition =
+            if (viewModel.equalToCurrentPlayTag()) viewModel.currentPlayPosition else -1
+
         val mPlaySourceAdapter =
-            PlaySourceAdapter(viewModel.playSource, object : onItemClickListener {
-                override fun onItemClick(position: Int) {
-                    viewModel.getPlayUrl(position)
-                    dismiss()
-                }
-            }, LinearLayoutManager.VERTICAL)
+            PlaySourceAdapter(
+                viewModel.playSource,
+                LinearLayoutManager.VERTICAL,
+                currentPosition,
+                object : onItemClickListener {
+                    override fun onItemClick(position: Int) {
+                        viewModel.getPlayUrl(position)
+                        dismiss()
+                    }
+                },
+            )
 
         mBinding.run {
             rvPlayUrlList.layoutManager =
                 GridLayoutManager(requireActivity(), 3, RecyclerView.VERTICAL, false)
             rvPlayUrlList.adapter = mPlaySourceAdapter
+            ivClose.visibility = if (showCloseIcon) View.VISIBLE else View.GONE
             ivClose.setOnClickListener { dismiss() }
         }
-
         return view
     }
 
-    override fun onBackPress(): Boolean {
+    override fun onBackPressed(): Boolean {
         dismiss()
         return true
     }

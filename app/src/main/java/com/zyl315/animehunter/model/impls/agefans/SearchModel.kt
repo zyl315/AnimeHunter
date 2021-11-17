@@ -2,6 +2,7 @@ package com.zyl315.animehunter.model.impls.agefans
 
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.execption.NoModeDataException
 import com.zyl315.animehunter.model.interfaces.ISearchModelModel
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import okhttp3.*
@@ -24,11 +25,16 @@ class SearchModel : ISearchModelModel {
 
         val totalCount = document.getElementById("result_count")?.text() ?: "0"
 
-        val elements = document.getElementsByClass("blockcontent1")[0]
-            ?.getElementsByClass("cell")
+        val blockContent =
+            document.getElementsByClass("blockcontent1").apply {
+                if (this.size == 0) throw NoModeDataException()
+            }
+
+        val elements = blockContent[0].getElementsByClass("cell")
+
         val searchResultList: MutableList<BangumiBean> = mutableListOf()
 
-        elements?.forEach { element ->
+        elements.forEach { element ->
             var name = ""
             var coverUrl = ""
             var newName = ""

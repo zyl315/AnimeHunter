@@ -1,7 +1,7 @@
 package com.zyl315.animehunter.view.activity
 
 import android.os.Bundle
-import android.util.DisplayMetrics
+import android.view.Gravity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
@@ -11,12 +11,9 @@ import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.util.BackHandlerHelper
-import com.zyl315.animehunter.util.getStatusBarHeight
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.view.adapter.PlaySourceAdapter
-import com.zyl315.animehunter.view.adapter.decoration.BangumiItemDecoration
 import com.zyl315.animehunter.view.adapter.onItemClickListener
-import com.zyl315.animehunter.view.fragment.BottomSourceFragment
 import com.zyl315.animehunter.view.fragment.PlaySourceFragment
 import com.zyl315.animehunter.view.widget.BangumiVideoController
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
@@ -45,18 +42,20 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         viewModel = ViewModelProvider(this).get(PlayViewModel::class.java)
         viewModel.bangumi = intent.getSerializableExtra("bangumi") as BangumiBean
 
-        mPlaySourceAdapter = PlaySourceAdapter(viewModel.playSource, object : onItemClickListener {
-            override fun onItemClick(position: Int) {
-                viewModel.getPlayUrl(position)
-                playerView.release()
-            }
-        }, GridLayoutManager.HORIZONTAL)
+        mPlaySourceAdapter = PlaySourceAdapter(
+            viewModel.playSource,
+            GridLayoutManager.HORIZONTAL,
+            viewModel.currentPlayPosition,
+            object : onItemClickListener {
+                override fun onItemClick(position: Int) {
+                    viewModel.getPlayUrl(position)
+                }
+            })
 
         mBinding.run {
             this@PlayActivity.playerView = playerView
             rvPlayUrlList.layoutManager =
                 GridLayoutManager(this@PlayActivity, 1, GridLayoutManager.HORIZONTAL, false)
-            rvPlayUrlList.addItemDecoration(BangumiItemDecoration())
             rvPlayUrlList.adapter = mPlaySourceAdapter
             rvPlayUrlList.setHasFixedSize(true)
 
@@ -69,9 +68,12 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         mBinding.run {
             tabPlaySource.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
-                    if (tab == null) return
-                    viewModel.setPlaySource(tab.position)
-                    mPlaySourceAdapter.updateDataList()
+                    tab?.let {
+                        viewModel.setPlaySource(tab.position)
+                        mPlaySourceAdapter.currentPosition =
+                            if (viewModel.equalToCurrentPlayTag()) viewModel.currentPlayPosition else -1
+                        mPlaySourceAdapter.notifyDataSetChanged()
+                    }
                 }
 
                 override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -84,7 +86,10 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             })
 
             tvExpand.setOnClickListener {
-                PlaySourceFragment().show(supportFragmentManager, R.id.fragment_container)
+                PlaySourceFragment(Gravity.BOTTOM).apply {
+                    backgroundColorId = R.color.design_default_color_background
+                }.show(supportFragmentManager, R.id.fragment_container)
+
             }
         }
     }
@@ -103,7 +108,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                         for (index in viewModel.playSourceList.indices) {
                             addTab(
                                 newTab().setText("播放源${index + 1}"),
-                                index == viewModel.currentSelect
+                                index == viewModel.currentSourceIndex
                             )
                         }
                     }
@@ -111,8 +116,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
                 PlayStatus.GET_PLAY_SOURCE_FAILED -> {
                     showToast(resId = R.string.get_play_source_failed)
-                    viewModel.currentEpisodeBean.url = ""
-                    playerView.setUrl("")
                 }
 
                 PlayStatus.GET_PLAY_URL_SUCCESS -> {
@@ -121,6 +124,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
                 PlayStatus.GET_PLAY_URL_FAILED -> {
                     viewModel.currentEpisodeBean.url = ""
+                    playerView.setUrl("")
                     showToast(resId = R.string.get_play_url_failed)
                 }
                 else -> {
@@ -130,6 +134,14 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
         viewModel.ipBanned.observe(this) {
             if (it) showToast(message = "请求过于频繁")
+        }
+
+        viewModel.currentPlayTag.observe(this) {
+            if (viewModel.equalToCurrentPlayTag()) {
+                mBinding.rvPlayUrlList.scrollToPosition(viewModel.currentPlayPosition)
+                mPlaySourceAdapter.setSelectPosition(viewModel.currentPlayPosition)
+            }
+            playerView.release()
         }
     }
 
@@ -162,10 +174,10 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
 
     override fun onBackPressed() {
-        if (playerView.onBackPressed()) {
+        if (BackHandlerHelper.handleBackPress(this)) {
             return
         }
-        if (BackHandlerHelper.handleBackPress(this)) {
+        if (playerView.onBackPressed()) {
             return
         }
         super.onBackPressed()

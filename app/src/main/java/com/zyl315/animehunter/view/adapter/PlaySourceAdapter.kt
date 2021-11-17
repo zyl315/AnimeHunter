@@ -10,10 +10,10 @@ import com.zyl315.animehunter.util.dp
 
 class PlaySourceAdapter(
     private var dataList: List<EpisodeBean>,
+    var orientation: Int,
+    var currentPosition: Int,
     var onItemClickListener: onItemClickListener,
-    var orientation: Int
 ) : BaseRvAdapter(dataList) {
-    private var currentPosition: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return PlaySourceViewHolder(
@@ -37,24 +37,30 @@ class PlaySourceAdapter(
             when (orientation) {
                 LinearLayoutManager.VERTICAL -> {
                     layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-                    if( layoutParams is ViewGroup.MarginLayoutParams) {
+                    if (layoutParams is ViewGroup.MarginLayoutParams) {
                         layoutParams.setMargins(8.dp, 4.dp, 8.dp, 4.dp)
+                    }
+                    holder.itemView.layoutParams = layoutParams
+                }
+
+                LinearLayoutManager.HORIZONTAL -> {
+                    if (layoutParams is ViewGroup.MarginLayoutParams) {
+                        layoutParams.setMargins(4.dp, 0, 4.dp, 0)
                     }
                     holder.itemView.layoutParams = layoutParams
                 }
             }
 
             itemView.setOnClickListener {
-                notifyItemChanged(position)
-                notifyItemChanged(currentPosition)
+                setSelectPosition(position)
                 onItemClickListener.onItemClick(position)
-                currentPosition = position
             }
         }
     }
 
-    fun updateDataList() {
-        currentPosition = -1
-        notifyDataSetChanged()
+    fun setSelectPosition(position: Int) {
+        notifyItemChanged(position)
+        notifyItemChanged(currentPosition)
+        currentPosition = position
     }
 }
