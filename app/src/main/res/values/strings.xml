@@ -13,4 +13,7 @@
     <string name="playing_at_2x_speed">2倍速播放中>></string>
     <string name="selections">选集</string>
     <string name="expand">展开</string>
+    <string name="confirm">确认</string>
+    <string name="unsupport_playback_links">不支持的播放链接，是否浏览器打开</string>
+    <string name="watched_history">观看历史</string>
 </resources>

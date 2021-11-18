@@ -10,7 +10,10 @@ import com.bumptech.glide.Glide
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.util.invisible
 import com.zyl315.animehunter.view.activity.PlayActivity
+import com.zyl315.animehunter.view.adapter.holder.CoverViewHolder
+import com.zyl315.animehunter.view.adapter.holder.EmptyViewHolder
 
 class SearchAdapter(
     private val activity: Activity,
@@ -37,8 +40,10 @@ class SearchAdapter(
             is CoverViewHolder -> {
                 holder.apply {
                     Glide.with(activity).load(item.coverUrl).into(ivCover)
-                    tvName.text = item.name
                     tvNewName.text = item.newName
+                    if (item.newName.isBlank()) tvName.invisible()
+
+                    tvName.text = item.name
                     tvBangumiType.text = item.bangumiType.run { "动画种类：$this" }
                     tvPremiereTime.text = item.premiereTime.run { "首播时间：$this" }
                     tvPlayStatus.text = item.playStatus.run { "播放状态：$this" }
@@ -49,7 +54,8 @@ class SearchAdapter(
                     activity.startActivity(
                         Intent(
                             activity,
-                            PlayActivity::class.java).apply {
+                            PlayActivity::class.java
+                        ).apply {
                             putExtra("bangumi", item)
                         })
                 }

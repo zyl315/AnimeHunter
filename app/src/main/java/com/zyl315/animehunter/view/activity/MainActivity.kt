@@ -2,8 +2,6 @@ package com.zyl315.animehunter.view.activity
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.viewbinding.ViewBinding
 import com.zyl315.animehunter.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
@@ -11,9 +9,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         super.onCreate(savedInstanceState)
 
         mBinding.run {
-            tvSearch.setOnClickListener {
+            btnSearch.setOnClickListener {
                 startActivity(Intent(this@MainActivity, SearchActivity::class.java))
             }
+
+
+            btnHistory.setOnClickListener {
+                startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
+            }
+
         }
     }
 

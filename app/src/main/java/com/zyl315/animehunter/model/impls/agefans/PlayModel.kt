@@ -10,6 +10,7 @@ import com.zyl315.animehunter.model.interfaces.IPlayModelModel
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.util.AgeFans.ipCheck
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.net.URLDecoder
@@ -81,15 +82,52 @@ class PlayModel : IPlayModelModel {
 
         val jsonObj = JSONObject(body)
         val purl = jsonObj.getString("purl")
-        val vurl = jsonObj.getString("vurl")
+        val vurl = URLDecoder.decode(jsonObj.getString("vurl"))
         val playEx = jsonObj.get("ex")
         val playId = jsonObj.getString("playid")
 
-        if (!playId.contains("<play>web_mp4")) {
+        if (!vurl.contains("http")) {
             throw UnSupportPlayTypeException()
         }
 
-        return URLDecoder.decode(vurl)
+        return vurl
+    }
+
+    override suspend fun getPlayUrl(episodeBean: EpisodeBean, retryCount: Int): EpisodeBean {
+        val url = episodeBean.href
+        val playUrl = url.replace(
+            Regex(".*\\/play\\/(\\d+?)\\?playid=(\\d+)_(\\d+).*"),
+            Const.AgeFans.PLAY_URL
+        )
+
+        val request = Request.Builder()
+            .url(Const.AgeFans.BASE_URL + playUrl + "&r=${Math.random()}")
+            .addHeader("Referer", Const.AgeFans.BASE_URL + url)
+            .build()
+
+        val response = client.newCall(request).execute()
+
+        val body = response.body?.string() ?: ""
+        if (body == "err:timeout") {
+            if (retryCount > 0) {
+                return getPlayUrl(episodeBean, retryCount - 1)
+            } else {
+                throw MaxRetryException("Exceeded the maximum number of reconnections.")
+            }
+        }
+
+        if (ipCheck(body)) {
+            throw IPCheckException("IP access is banned due to frequent requests.")
+        }
+
+        val jsonObj = JSONObject(body)
+        episodeBean.apply {
+            purl = jsonObj.getString("purl")
+            vurl = URLDecoder.decode(jsonObj.getString("vurl"))
+            playEx = jsonObj.getString("ex")
+            playId = jsonObj.getString("playid")
+        }
+        return episodeBean
     }
 }
 

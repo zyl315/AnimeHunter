@@ -7,8 +7,12 @@ import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.bean.age.PlaySourceBean
+import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.execption.IPCheckException
+import com.zyl315.animehunter.execption.UnSupportPlayTypeException
+import com.zyl315.animehunter.model.impls.HistoryModel
 import com.zyl315.animehunter.model.impls.agefans.PlayModel
+import com.zyl315.animehunter.model.interfaces.IHistoryModel
 import com.zyl315.animehunter.model.interfaces.IPlayModelModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +23,10 @@ class PlayViewModel : ViewModel() {
         PlayModel()
     }
 
+    private val historyModel: IHistoryModel by lazy {
+        HistoryModel()
+    }
+
     var playSourceList: MutableList<PlaySourceBean> = mutableListOf()
     var playSource: MutableList<EpisodeBean> = mutableListOf()
     var currentSourceIndex = -1
@@ -26,6 +34,7 @@ class PlayViewModel : ViewModel() {
 
     val playStatus: MutableLiveData<PlayStatus> = MutableLiveData()
     val ipBanned: MutableLiveData<Boolean> = MutableLiveData()
+    val unSupportPlayType: MutableLiveData<Boolean> = MutableLiveData()
     val currentPlayTag: MutableLiveData<String> = MutableLiveData()
 
     lateinit var bangumi: BangumiBean
@@ -56,6 +65,8 @@ class PlayViewModel : ViewModel() {
                     currentEpisodeBean.url = playModel.getPlayUrl(currentEpisodeBean.href)
                 }
                 playStatus.postValue(PlayStatus.GET_PLAY_URL_SUCCESS)
+            } catch (e: UnSupportPlayTypeException) {
+                unSupportPlayType.postValue(true)
             } catch (e: IPCheckException) {
                 ipBanned.postValue(true)
             } catch (e: Exception) {
@@ -85,5 +96,31 @@ class PlayViewModel : ViewModel() {
         currentEpisodeBean = playSource[position]
         currentPlayPosition = position
         currentPlayTag.postValue(getCurrentPlayTag())
+    }
+
+    fun saveWatchHistory(currentPosition: Long, duration: Long) {
+        if (!this::bangumi.isInitialized || !this::currentEpisodeBean.isInitialized || duration == 0L) {
+            return
+        }
+        try {
+            viewModelScope.launch(Dispatchers.IO) {
+                historyModel.saveWatchHistory(
+                    WatchHistory(
+                        bangumi.bangumiID,
+                        bangumi.name,
+                        bangumi.coverUrl,
+                        System.currentTimeMillis(),
+                        currentSourceIndex,
+                        currentEpisodeBean.title,
+                        currentPlayPosition,
+                        currentEpisodeBean.url,
+                        duration,
+                        currentPosition
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

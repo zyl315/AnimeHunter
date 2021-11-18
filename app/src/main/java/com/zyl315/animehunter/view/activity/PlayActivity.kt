@@ -1,11 +1,17 @@
 package com.zyl315.animehunter.view.activity
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
+import androidx.core.view.get
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
@@ -19,6 +25,7 @@ import com.zyl315.animehunter.view.widget.BangumiVideoController
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 import com.zyl315.player.player.AbstractPlayer
 import com.zyl315.player.player.VideoView
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private lateinit var viewModel: PlayViewModel
@@ -92,6 +99,22 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
             }
         }
+
+        playerView.addOnStateChangeListener(object : VideoView.OnStateChangeListener {
+            override fun onPlayerStateChanged(playerState: Int) {
+
+            }
+
+            override fun onPlayStateChanged(playState: Int) {
+                when (playState) {
+                    VideoView.STATE_PAUSED,
+                    VideoView.STATE_PLAYBACK_COMPLETED -> {
+                        viewModel.saveWatchHistory(playerView.currentPosition, playerView.duration)
+                    }
+                }
+            }
+
+        })
     }
 
     private fun initData() {
@@ -142,6 +165,19 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 mPlaySourceAdapter.setSelectPosition(viewModel.currentPlayPosition)
             }
             playerView.release()
+        }
+
+        viewModel.unSupportPlayType.observe(this) {
+            Snackbar.make(
+                mBinding.playerView,
+                getString(R.string.unsupport_playback_links),
+                Snackbar.LENGTH_LONG
+            ).setAction(getString(R.string.confirm)) {
+                val uri = Uri.parse(viewModel.currentEpisodeBean.let {
+                    return@let (Const.AgeFans.BASE_URL + it.href)
+                })
+                startActivity(Intent(Intent.ACTION_VIEW, uri))
+            }.show()
         }
     }
 
