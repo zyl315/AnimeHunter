@@ -1,8 +1,8 @@
-package com.zyl315.animehunter.model.interfaces
+package com.zyl315.animehunter.repository.interfaces
 
 import com.zyl315.animehunter.database.enity.WatchHistory
 
-interface IHistoryModel : IBaseModel {
+interface IHistoryRepository : IBaseRepository {
     suspend fun loadAllWatchHistory(): MutableList<WatchHistory>
 
     suspend fun loadWatchHistoryById(bangumiId: String): WatchHistory?

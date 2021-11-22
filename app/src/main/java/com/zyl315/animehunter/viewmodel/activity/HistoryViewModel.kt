@@ -4,14 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.database.enity.WatchHistory
-import com.zyl315.animehunter.model.impls.HistoryModel
-import com.zyl315.animehunter.model.interfaces.IHistoryModel
+import com.zyl315.animehunter.repository.impls.HistoryRepository
+import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HistoryViewModel : ViewModel() {
-    private val historyModel: IHistoryModel by lazy {
-        HistoryModel()
+    private val historyRepository: IHistoryRepository by lazy {
+        HistoryRepository()
     }
 
     var isSelectModel = false
@@ -28,7 +28,7 @@ class HistoryViewModel : ViewModel() {
             try {
                 watchHistoryList.apply {
                     clear()
-                    addAll(historyModel.loadAllWatchHistory())
+                    addAll(historyRepository.loadAllWatchHistory())
                 }
                 loadWatchHistorySuccess.postValue(true)
             } catch (e: Exception) {
@@ -41,7 +41,7 @@ class HistoryViewModel : ViewModel() {
     fun deleteHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                historyModel.deleteWatchHistory(*selectSet.toTypedArray())
+                historyRepository.deleteWatchHistory(*selectSet.toTypedArray())
                 watchHistoryList.removeAll(selectSet)
                 deleteHistorySuccess.postValue(true)
             } catch (e: Exception) {

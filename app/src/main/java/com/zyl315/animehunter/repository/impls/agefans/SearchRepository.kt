@@ -1,14 +1,14 @@
-package com.zyl315.animehunter.model.impls.agefans
+package com.zyl315.animehunter.repository.impls.agefans
 
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.execption.NoModeDataException
-import com.zyl315.animehunter.model.interfaces.ISearchModelModel
+import com.zyl315.animehunter.repository.interfaces.ISearchRepository
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import okhttp3.*
 import org.jsoup.Jsoup
 
-class SearchModel : ISearchModelModel {
+class SearchRepository : ISearchRepository {
 
     override suspend fun getSearchData(
         keyWord: String,

@@ -1,4 +1,4 @@
-package com.zyl315.animehunter.model.impls.agefans
+package com.zyl315.animehunter.repository.impls.agefans
 
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.EpisodeBean
@@ -6,16 +6,15 @@ import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.MaxRetryException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
-import com.zyl315.animehunter.model.interfaces.IPlayModelModel
+import com.zyl315.animehunter.repository.interfaces.IPlayRepository
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.util.AgeFans.ipCheck
 import okhttp3.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 
-class PlayModel : IPlayModelModel {
+class PlayRepository : IPlayRepository {
     private val client: OkHttpClient = MyOkHttpClient.client
 
     override suspend fun getPlaySource(bangumiId: String): MutableList<PlaySourceBean> {

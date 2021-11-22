@@ -1,9 +1,9 @@
-package com.zyl315.animehunter.model.interfaces
+package com.zyl315.animehunter.repository.interfaces
 
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.bean.age.PlaySourceBean
 
-interface IPlayModelModel : IBaseModel {
+interface IPlayRepository : IBaseRepository {
     suspend fun getPlaySource(bangumiId: String): MutableList<PlaySourceBean>
 
     suspend fun getPlayUrl(url: String, retryCount: Int = 3): String

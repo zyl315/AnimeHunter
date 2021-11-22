@@ -6,15 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.execption.NoModeDataException
-import com.zyl315.animehunter.model.impls.agefans.SearchModel
-import com.zyl315.animehunter.model.interfaces.ISearchModelModel
+import com.zyl315.animehunter.repository.impls.agefans.SearchRepository
+import com.zyl315.animehunter.repository.interfaces.ISearchRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SearchViewModel : ViewModel() {
-    private val searchModel: ISearchModelModel by lazy {
-        SearchModel()
-    }
+    private val searchRepository: ISearchRepository = SearchRepository()
 
     var mSearchResultList: MutableList<BangumiBean> = mutableListOf()
     var mSearchResultSearchStatus: MutableLiveData<SearchStatus> = MutableLiveData()
@@ -30,7 +28,7 @@ class SearchViewModel : ViewModel() {
                     mSearchResultList.clear()
                 }
 
-                searchModel.getSearchData(keyWord, pageNumber).also {
+                searchRepository.getSearchData(keyWord, pageNumber).also {
                     mSearchResultList.addAll(it.first)
                     totalCount = "共${it.second}"
                     searchWord = keyWord
@@ -50,7 +48,7 @@ class SearchViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (searchWord.isBlank()) return@launch
-                searchModel.getSearchData(searchWord, pageNumber + 1).also {
+                searchRepository.getSearchData(searchWord, pageNumber + 1).also {
                     mSearchResultList.addAll(it.first)
                     pageNumber += 1
                 }

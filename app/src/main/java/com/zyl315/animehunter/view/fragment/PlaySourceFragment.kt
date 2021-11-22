@@ -32,7 +32,7 @@ class PlaySourceFragment(override var popupGravity: Int) :
         viewModel = ViewModelProvider(requireActivity()).get(PlayViewModel::class.java)
 
         val currentPosition =
-            if (viewModel.equalToCurrentPlayTag()) viewModel.currentPlayPosition else -1
+            if (viewModel.equalToCurrentPlayTag()) viewModel.currentEpisodeIndex else -1
 
         val mPlaySourceAdapter =
             PlaySourceAdapter(

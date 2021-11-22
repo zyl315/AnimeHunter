@@ -1,8 +1,8 @@
-package com.zyl315.animehunter.model.interfaces
+package com.zyl315.animehunter.repository.interfaces
 
 import com.zyl315.animehunter.bean.age.BangumiBean
 
-interface ISearchModelModel : IBaseModel {
+interface ISearchRepository : IBaseRepository {
     suspend fun getSearchData(keyWord: String, page: Int): Pair<MutableList<BangumiBean>, String>
 
     companion object {

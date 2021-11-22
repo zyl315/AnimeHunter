@@ -49,7 +49,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         mPlaySourceAdapter = PlaySourceAdapter(
             viewModel.playSource,
             GridLayoutManager.HORIZONTAL,
-            viewModel.currentPlayPosition,
+            viewModel.currentEpisodeIndex,
             object : onItemClickListener {
                 override fun onItemClick(position: Int) {
                     viewModel.getPlayUrl(position)
@@ -75,7 +75,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                     tab?.let {
                         viewModel.setPlaySource(tab.position)
                         mPlaySourceAdapter.currentPosition =
-                            if (viewModel.equalToCurrentPlayTag()) viewModel.currentPlayPosition else -1
+                            if (viewModel.equalToCurrentPlayTag()) viewModel.currentEpisodeIndex else -1
                         mPlaySourceAdapter.notifyDataSetChanged()
                     }
                 }
@@ -134,7 +134,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                         }
                     }
                     if (viewModel.continuePlay) {
-                        viewModel.getPlayUrl(viewModel.currentPlayPosition)
+                        viewModel.getPlayUrl(viewModel.currentEpisodeIndex)
                     }
                 }
 
@@ -160,8 +160,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
         viewModel.currentPlayTag.observe(this) {
             if (viewModel.equalToCurrentPlayTag()) {
-                mBinding.rvPlayUrlList.scrollToPosition(viewModel.currentPlayPosition)
-                mPlaySourceAdapter.setSelectPosition(viewModel.currentPlayPosition)
+                mBinding.rvPlayUrlList.scrollToPosition(viewModel.currentEpisodeIndex)
+                mPlaySourceAdapter.setSelectPosition(viewModel.currentEpisodeIndex)
             }
             playerView.release()
         }

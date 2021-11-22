@@ -10,26 +10,21 @@ import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
-import com.zyl315.animehunter.model.impls.HistoryModel
-import com.zyl315.animehunter.model.impls.agefans.PlayModel
-import com.zyl315.animehunter.model.interfaces.IHistoryModel
-import com.zyl315.animehunter.model.interfaces.IPlayModelModel
+import com.zyl315.animehunter.repository.impls.HistoryRepository
+import com.zyl315.animehunter.repository.impls.agefans.PlayRepository
+import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
+import com.zyl315.animehunter.repository.interfaces.IPlayRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlayViewModel : ViewModel() {
-    private val playModel: IPlayModelModel by lazy {
-        PlayModel()
-    }
-
-    private val historyModel: IHistoryModel by lazy {
-        HistoryModel()
-    }
+    private val playRepository: IPlayRepository = PlayRepository()
+    private val historyModel: IHistoryRepository = HistoryRepository()
 
     var playSourceList: MutableList<PlaySourceBean> = mutableListOf()
     var playSource: MutableList<EpisodeBean> = mutableListOf()
-    var currentSourceIndex = -1
-    var currentPlayPosition = -1
+    var currentSourceIndex = 1
+    var currentEpisodeIndex = 1
     var continuePlay = false
 
     val playStatus: MutableLiveData<PlayStatus> = MutableLiveData()
@@ -45,7 +40,7 @@ class PlayViewModel : ViewModel() {
     fun getPlaySource() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                playSourceList = playModel.getPlaySource(bangumi.bangumiID)
+                playSourceList = playRepository.getPlaySource(bangumi.bangumiID)
                 playSourceList.forEachIndexed { index, playSourceBean ->
                     if (continuePlay) {
                         setPlaySource(currentSourceIndex)
@@ -67,7 +62,7 @@ class PlayViewModel : ViewModel() {
             try {
                 setPlayEpisode(position)
                 if (currentEpisodeBean.url == "") {
-                    currentEpisodeBean.url = playModel.getPlayUrl(currentEpisodeBean.href)
+                    currentEpisodeBean.url = playRepository.getPlayUrl(currentEpisodeBean.href)
                 }
                 playStatus.postValue(PlayStatus.GET_PLAY_URL_SUCCESS)
             } catch (e: UnSupportPlayTypeException) {
@@ -87,7 +82,7 @@ class PlayViewModel : ViewModel() {
                 historyModel.loadWatchHistoryById(bangumi.bangumiID)?.let {
                     watchHistory = it
                     currentSourceIndex = watchHistory.dataSourceIndex
-                    currentPlayPosition = watchHistory.episodeIndex
+                    currentEpisodeIndex = watchHistory.episodeIndex
                     continuePlay = true
                 }
             } catch (e: Exception) {
@@ -113,7 +108,7 @@ class PlayViewModel : ViewModel() {
     }
 
     private fun getCurrentPlayTag(): String {
-        return "$currentSourceIndex$currentPlayPosition"
+        return "$currentSourceIndex$currentEpisodeIndex"
     }
 
     fun setPlaySource(index: Int) {
@@ -125,7 +120,7 @@ class PlayViewModel : ViewModel() {
 
     private fun setPlayEpisode(position: Int) {
         currentEpisodeBean = playSource[position]
-        currentPlayPosition = position
+        currentEpisodeIndex = position
         currentPlayTag.postValue(getCurrentPlayTag())
     }
 
@@ -141,7 +136,7 @@ class PlayViewModel : ViewModel() {
                         System.currentTimeMillis(),
                         currentSourceIndex,
                         currentEpisodeBean.title,
-                        currentPlayPosition,
+                        currentEpisodeIndex,
                         duration,
                         currentPosition,
                         bangumi

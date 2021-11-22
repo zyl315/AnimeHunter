@@ -1,10 +1,10 @@
-package com.zyl315.animehunter.model.impls
+package com.zyl315.animehunter.repository.impls
 
 import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.database.getAppDataBase
-import com.zyl315.animehunter.model.interfaces.IHistoryModel
+import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
 
-class HistoryModel : IHistoryModel {
+class HistoryRepository : IHistoryRepository {
     private val appDatabase by lazy {
         getAppDataBase()
     }
