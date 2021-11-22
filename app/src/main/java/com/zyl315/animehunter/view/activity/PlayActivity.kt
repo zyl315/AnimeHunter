@@ -4,8 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
-import android.view.View
-import androidx.core.view.get
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -25,7 +23,6 @@ import com.zyl315.animehunter.view.widget.BangumiVideoController
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 import com.zyl315.player.player.AbstractPlayer
 import com.zyl315.player.player.VideoView
-import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private lateinit var viewModel: PlayViewModel
@@ -38,17 +35,17 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initView()
+
+        viewModel = ViewModelProvider(this).get(PlayViewModel::class.java)
+
         initData()
+        initView()
         initListener()
         initPlayer()
         initObserve()
     }
 
     private fun initView() {
-        viewModel = ViewModelProvider(this).get(PlayViewModel::class.java)
-        viewModel.bangumi = intent.getSerializableExtra("bangumi") as BangumiBean
-
         mPlaySourceAdapter = PlaySourceAdapter(
             viewModel.playSource,
             GridLayoutManager.HORIZONTAL,
@@ -107,19 +104,20 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
             override fun onPlayStateChanged(playState: Int) {
                 when (playState) {
+                    VideoView.STATE_IDLE,
+                    VideoView.STATE_START_ABORT,
                     VideoView.STATE_PAUSED,
                     VideoView.STATE_PLAYBACK_COMPLETED -> {
                         viewModel.saveWatchHistory(playerView.currentPosition, playerView.duration)
                     }
                 }
             }
-
         })
     }
 
     private fun initData() {
-        viewModel.getPlaySource()
-
+        viewModel.bangumi = intent.getSerializableExtra(BANGUMI_BEAN) as BangumiBean
+        viewModel.getWatchHistory()
     }
 
     private fun initObserve() {
@@ -135,6 +133,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                             )
                         }
                     }
+                    if (viewModel.continuePlay) {
+                        viewModel.getPlayUrl(viewModel.currentPlayPosition)
+                    }
                 }
 
                 PlayStatus.GET_PLAY_SOURCE_FAILED -> {
@@ -146,8 +147,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 }
 
                 PlayStatus.GET_PLAY_URL_FAILED -> {
-                    viewModel.currentEpisodeBean.url = ""
-                    playerView.setUrl("")
                     showToast(resId = R.string.get_play_url_failed)
                 }
                 else -> {
@@ -189,6 +188,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun starPlay(episodeBean: EpisodeBean) {
         playerController.setTitle(episodeBean.title)
+        playerView.skipPositionWhenPlay(viewModel.getWatchHistoryPosition())
         playerView.setUrl(episodeBean.url)
         playerView.start()
     }
@@ -217,5 +217,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             return
         }
         super.onBackPressed()
+    }
+
+    companion object {
+        const val BANGUMI_BEAN = "BANGUMI_TAG"
     }
 }

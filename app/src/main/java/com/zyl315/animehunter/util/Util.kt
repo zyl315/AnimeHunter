@@ -34,16 +34,6 @@ fun Context.showToast(
     showToast(context, context.getString(resId), duration, mainThread)
 }
 
-fun Context.getStatusBarHeight(): Int {
-    var result = 0
-    //获取状态栏高度的资源id
-    val resourceId: Int = resources.getIdentifier("status_bar_height", "dimen", "android")
-    if (resourceId > 0) {
-        result = resources.getDimensionPixelSize(resourceId)
-    }
-    return result
-}
-
 
 object MyToast {
     private var lastToastMessage: String = ""

@@ -14,9 +14,14 @@ class HistoryViewModel : ViewModel() {
         HistoryModel()
     }
 
+    var isSelectModel = false
+    val selectSet: MutableSet<WatchHistory> = mutableSetOf()
+
     val watchHistoryList: MutableList<WatchHistory> = mutableListOf()
 
     val loadWatchHistorySuccess: MutableLiveData<Boolean> = MutableLiveData()
+    val isSelectedAll: MutableLiveData<Boolean> = MutableLiveData(false)
+    val deleteHistorySuccess: MutableLiveData<Boolean> = MutableLiveData()
 
     fun loadAllWatchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -31,5 +36,22 @@ class HistoryViewModel : ViewModel() {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun deleteHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                historyModel.deleteWatchHistory(*selectSet.toTypedArray())
+                watchHistoryList.removeAll(selectSet)
+                deleteHistorySuccess.postValue(true)
+            } catch (e: Exception) {
+                deleteHistorySuccess.postValue(false)
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun isSelectAll(): Boolean {
+        return selectSet.size == watchHistoryList.size
     }
 }

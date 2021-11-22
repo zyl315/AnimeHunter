@@ -10,8 +10,9 @@ import com.bumptech.glide.Glide
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
-import com.zyl315.animehunter.util.invisible
+import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.view.activity.PlayActivity
+import com.zyl315.animehunter.view.activity.PlayActivity.Companion.BANGUMI_BEAN
 import com.zyl315.animehunter.view.adapter.holder.CoverViewHolder
 import com.zyl315.animehunter.view.adapter.holder.EmptyViewHolder
 
@@ -41,7 +42,7 @@ class SearchAdapter(
                 holder.apply {
                     Glide.with(activity).load(item.coverUrl).into(ivCover)
                     tvNewName.text = item.newName
-                    if (item.newName.isBlank()) tvName.invisible()
+                    if (item.newName.isBlank()) tvNewName.gone()
 
                     tvName.text = item.name
                     tvBangumiType.text = item.bangumiType.run { "动画种类：$this" }
@@ -56,7 +57,7 @@ class SearchAdapter(
                             activity,
                             PlayActivity::class.java
                         ).apply {
-                            putExtra("bangumi", item)
+                            putExtra(BANGUMI_BEAN, item)
                         })
                 }
             }

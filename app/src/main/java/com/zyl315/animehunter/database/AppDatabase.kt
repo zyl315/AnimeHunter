@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.zyl315.animehunter.App
+import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.database.dao.WatchHistoryDao
 import com.zyl315.animehunter.database.enity.WatchHistory
 
@@ -24,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
             if (instance == null) {
                 synchronized(this) {
                     if (instance == null) {
-                        Room.databaseBuilder(
+                        instance = Room.databaseBuilder(
                             context.applicationContext,
                             AppDatabase::class.java,
                             "data.db"

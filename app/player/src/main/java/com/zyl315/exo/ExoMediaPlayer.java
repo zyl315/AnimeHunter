@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
@@ -243,6 +244,11 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
     public long getTcpSpeed() {
         // no support
         return 0;
+    }
+
+    @Override
+    public void onPlayerError(PlaybackException error) {
+        mPlayerEventListener.onError();
     }
 
     @Override

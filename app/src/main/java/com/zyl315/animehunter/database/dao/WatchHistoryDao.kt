@@ -3,6 +3,7 @@ package com.zyl315.animehunter.database.dao
 import androidx.room.*
 import com.zyl315.animehunter.database.enity.WatchHistory
 
+@Dao
 interface WatchHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertWatchHistory(vararg watchHistory: WatchHistory)

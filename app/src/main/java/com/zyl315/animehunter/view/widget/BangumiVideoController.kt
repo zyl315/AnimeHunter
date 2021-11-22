@@ -28,6 +28,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
     private lateinit var titleView: TitleView
     private lateinit var completeView: CompleteView
     private lateinit var bottomControlView: BottomControlView
+    private lateinit var gestureView: GestureView
 
     private var mPlaySpeed = 1f
 
@@ -55,8 +56,9 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
         prepareView = PrepareView(context)
         titleView = TitleView(context)
         bottomControlView = BottomControlView(context)
+        gestureView = GestureView(context)
         addControlComponent(completeView, errorView, prepareView, titleView)
-        addControlComponent(bottomControlView, GestureView(context))
+        addControlComponent(bottomControlView, gestureView)
     }
 
     fun setTitle(title: String) {
@@ -177,6 +179,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
         speedTip.visibility = VISIBLE
         mPlaySpeed = mControlWrapper.speed
         mControlWrapper.speed = 2.0f
+        setGestureEnabled(false)
     }
 
 
@@ -195,6 +198,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
                 if (speedTip.isVisible) {
                     speedTip.visibility = GONE
                     mControlWrapper.speed = mPlaySpeed
+                    setGestureEnabled(true)
                     return true
                 }
             }

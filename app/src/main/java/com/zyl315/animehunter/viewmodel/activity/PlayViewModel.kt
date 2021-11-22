@@ -16,7 +16,6 @@ import com.zyl315.animehunter.model.interfaces.IHistoryModel
 import com.zyl315.animehunter.model.interfaces.IPlayModelModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 class PlayViewModel : ViewModel() {
     private val playModel: IPlayModelModel by lazy {
@@ -31,6 +30,7 @@ class PlayViewModel : ViewModel() {
     var playSource: MutableList<EpisodeBean> = mutableListOf()
     var currentSourceIndex = -1
     var currentPlayPosition = -1
+    var continuePlay = false
 
     val playStatus: MutableLiveData<PlayStatus> = MutableLiveData()
     val ipBanned: MutableLiveData<Boolean> = MutableLiveData()
@@ -39,6 +39,7 @@ class PlayViewModel : ViewModel() {
 
     lateinit var bangumi: BangumiBean
     lateinit var currentEpisodeBean: EpisodeBean
+    lateinit var watchHistory: WatchHistory
 
 
     fun getPlaySource() {
@@ -46,7 +47,11 @@ class PlayViewModel : ViewModel() {
             try {
                 playSourceList = playModel.getPlaySource(bangumi.bangumiID)
                 playSourceList.forEachIndexed { index, playSourceBean ->
-                    if (playSourceBean.select) setPlaySource(index)
+                    if (continuePlay) {
+                        setPlaySource(currentSourceIndex)
+                    } else if (playSourceBean.select) {
+                        setPlaySource(index)
+                    }
                 }
                 playStatus.postValue(PlayStatus.GET_PLAY_SOURCE_SUCCESS)
             } catch (e: Exception) {
@@ -60,7 +65,7 @@ class PlayViewModel : ViewModel() {
     fun getPlayUrl(position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                setPlayUrl(position)
+                setPlayEpisode(position)
                 if (currentEpisodeBean.url == "") {
                     currentEpisodeBean.url = playModel.getPlayUrl(currentEpisodeBean.href)
                 }
@@ -73,7 +78,33 @@ class PlayViewModel : ViewModel() {
                 playStatus.postValue(PlayStatus.GET_PLAY_URL_FAILED)
                 e.printStackTrace()
             }
+        }
+    }
 
+    fun getWatchHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                historyModel.loadWatchHistoryById(bangumi.bangumiID)?.let {
+                    watchHistory = it
+                    currentSourceIndex = watchHistory.dataSourceIndex
+                    currentPlayPosition = watchHistory.episodeIndex
+                    continuePlay = true
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            getPlaySource()
+        }
+    }
+
+    fun getWatchHistoryPosition(): Long {
+        return if (!this::watchHistory.isInitialized || !continuePlay) {
+            0
+        } else {
+            val position = watchHistory.watchedPosition
+            watchHistory.watchedPosition = 0
+            continuePlay = false
+            position
         }
     }
 
@@ -81,18 +112,18 @@ class PlayViewModel : ViewModel() {
         return currentPlayTag.value == getCurrentPlayTag()
     }
 
-    fun getCurrentPlayTag(): String {
+    private fun getCurrentPlayTag(): String {
         return "$currentSourceIndex$currentPlayPosition"
     }
 
     fun setPlaySource(index: Int) {
-        if (index < 0 || index >= playSourceList.size || index == currentSourceIndex) return
+        if (index < 0 || index >= playSourceList.size) return
         currentSourceIndex = index
         playSource.clear()
         playSource.addAll(playSourceList[index].episodeList)
     }
 
-    fun setPlayUrl(position: Int) {
+    private fun setPlayEpisode(position: Int) {
         currentEpisodeBean = playSource[position]
         currentPlayPosition = position
         currentPlayTag.postValue(getCurrentPlayTag())
@@ -107,15 +138,13 @@ class PlayViewModel : ViewModel() {
                 historyModel.saveWatchHistory(
                     WatchHistory(
                         bangumi.bangumiID,
-                        bangumi.name,
-                        bangumi.coverUrl,
                         System.currentTimeMillis(),
                         currentSourceIndex,
                         currentEpisodeBean.title,
                         currentPlayPosition,
-                        currentEpisodeBean.url,
                         duration,
-                        currentPosition
+                        currentPosition,
+                        bangumi
                     )
                 )
             }

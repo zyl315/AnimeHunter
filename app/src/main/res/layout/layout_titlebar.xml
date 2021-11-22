@@ -15,14 +15,16 @@
         android:scaleType="centerInside"
         android:src="@drawable/dkplayer_ic_action_arrow_back" />
 
-    <ImageButton
-        android:id="@+id/ib_rightIcon"
+    <TextView
+        android:id="@+id/tv_right"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="8dp"
-        android:visibility="invisible" />
+        android:gravity="center"
+        android:textColor="@color/white"
+        tools:text="菜单" />
 
 
     <TextView
@@ -30,10 +32,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_toEndOf="@id/ib_leftIcon"
-        android:layout_toStartOf="@id/ib_rightIcon"
+        android:layout_toStartOf="@id/tv_right"
         android:gravity="center"
         android:maxLines="1"
         android:paddingHorizontal="8dp"
         android:textColor="@color/white"
+        android:textSize="16sp"
         tools:text="标题" />
 </RelativeLayout>

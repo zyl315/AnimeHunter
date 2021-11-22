@@ -1,12 +1,11 @@
 package com.zyl315.animehunter.view.adapter.holder
 
-import android.media.Image
 import android.view.View
 import android.widget.ImageView
+import android.widget.RadioButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
-import org.w3c.dom.Text
 
 class EmptyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -31,4 +30,5 @@ class WatchHistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     val tvBangumiTitle: TextView = itemView.findViewById(R.id.tv_bangumiTitle)
     val tvEpisodeTitle: TextView = itemView.findViewById(R.id.tv_episodeTitle)
     val tvLastWatchTime: TextView = itemView.findViewById(R.id.tv_lastWatchTime)
+    val rbSelect: RadioButton = itemView.findViewById(R.id.rb_select)
 }

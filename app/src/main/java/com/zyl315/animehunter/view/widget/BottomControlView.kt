@@ -136,10 +136,12 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
             VideoView.PLAYER_NORMAL -> {
                 mFullScreen.isSelected = false
                 mSelections.visibility = GONE
+                showBottomProgress(true)
             }
             VideoView.PLAYER_FULL_SCREEN -> {
                 mFullScreen.isSelected = true
                 mSelections.visibility = VISIBLE
+                showBottomProgress(false)
             }
         }
         val activity = PlayerUtils.scanForActivity(context)
