@@ -1,0 +1,148 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "1148d4c0032c106a7a5d2cb9dd63865d",
+    "entities": [
+      {
+        "tableName": "WatchHistory",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeID` TEXT NOT NULL, `time` INTEGER NOT NULL, `dataSourceIndex` INTEGER NOT NULL, `episodeName` TEXT NOT NULL, `episodeIndex` INTEGER NOT NULL, `duration` INTEGER NOT NULL, `watchedPosition` INTEGER NOT NULL, `bangumiID` TEXT NOT NULL, `name` TEXT, `bangumiType` TEXT, `originalName` TEXT, `otherName` TEXT, `premiereTime` TEXT, `playStatus` TEXT, `originalWork` TEXT, `plotType` TEXT, `productionCompany` TEXT, `description` TEXT, `coverUrl` TEXT, `newName` TEXT, PRIMARY KEY(`animeID`))",
+        "fields": [
+          {
+            "fieldPath": "bangumiID",
+            "columnName": "animeID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataSourceIndex",
+            "columnName": "dataSourceIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeName",
+            "columnName": "episodeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeIndex",
+            "columnName": "episodeIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "watchedPosition",
+            "columnName": "watchedPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bangumiBean.bangumiID",
+            "columnName": "bangumiID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bangumiBean.name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.bangumiType",
+            "columnName": "bangumiType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.originalName",
+            "columnName": "originalName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.otherName",
+            "columnName": "otherName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.premiereTime",
+            "columnName": "premiereTime",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.playStatus",
+            "columnName": "playStatus",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.originalWork",
+            "columnName": "originalWork",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.plotType",
+            "columnName": "plotType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.productionCompany",
+            "columnName": "productionCompany",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.coverUrl",
+            "columnName": "coverUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bangumiBean.newName",
+            "columnName": "newName",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "animeID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1148d4c0032c106a7a5d2cb9dd63865d')"
+    ]
+  }
+}

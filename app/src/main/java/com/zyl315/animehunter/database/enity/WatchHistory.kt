@@ -1,5 +1,6 @@
 package com.zyl315.animehunter.database.enity
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,7 +10,8 @@ import com.zyl315.animehunter.bean.age.BangumiBean
 @Entity
 data class WatchHistory(
     @PrimaryKey
-    var animeId: String,
+    @ColumnInfo(name = "animeID")
+    var bangumiID: String,
     var time: Long,
     var dataSourceIndex: Int,
     var episodeName: String,
@@ -19,3 +21,4 @@ data class WatchHistory(
     @Embedded
     var bangumiBean: BangumiBean
 ) : BaseBean
+
