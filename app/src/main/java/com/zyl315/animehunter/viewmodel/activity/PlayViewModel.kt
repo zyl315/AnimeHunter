@@ -92,7 +92,7 @@ class PlayViewModel : ViewModel() {
         }
     }
 
-    fun getWatchHistoryPosition(): Long {
+    fun getWatchHistoryProgress(): Long {
         return if (!this::watchHistory.isInitialized || !continuePlay) {
             0
         } else {
@@ -124,8 +124,11 @@ class PlayViewModel : ViewModel() {
         currentPlayTag.postValue(getCurrentPlayTag())
     }
 
-    fun saveWatchHistory(currentPosition: Long, duration: Long) {
+    fun saveWatchProgress(url: String?, currentPosition: Long, duration: Long) {
         if (!this::bangumi.isInitialized || !this::currentEpisodeBean.isInitialized || duration == 0L) {
+            return
+        }
+        if(url != currentEpisodeBean.url) {
             return
         }
         try {

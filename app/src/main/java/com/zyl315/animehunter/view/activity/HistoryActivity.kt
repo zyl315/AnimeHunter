@@ -3,6 +3,7 @@ package com.zyl315.animehunter.view.activity
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivityHistoryBinding
@@ -57,7 +58,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                     rbSelectAll.isChecked = false
                     viewModel.selectSet.clear()
                 }
-                historyAdapter.notifyDataSetChanged()
             }
 
             tvDelete.setOnClickListener {
@@ -79,10 +79,11 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         viewModel.loadAllWatchHistory()
     }
 
+
     private fun observe() {
         viewModel.loadWatchHistorySuccess.observe(this) { success ->
             if (success) {
-                historyAdapter.notifyDataSetChanged()
+                historyAdapter.updateList(viewModel.watchHistoryList)
             } else {
                 showToast(message = "加载观看历史失败")
             }

@@ -31,12 +31,11 @@
     <TextView
         android:id="@+id/tv_bangumiTitle"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:gravity="center_vertical"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tv_episodeTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/iv_cover"
         app:layout_constraintTop_toTopOf="parent"
@@ -45,24 +44,40 @@
     <TextView
         android:id="@+id/tv_episodeTitle"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:gravity="center"
+        android:textSize="15sp"
         app:layout_constraintBottom_toTopOf="@id/tv_lastWatchTime"
         app:layout_constraintStart_toEndOf="@+id/iv_cover"
         app:layout_constraintTop_toBottomOf="@id/tv_bangumiTitle"
+        app:layout_constraintVertical_bias="0.35"
         tools:text="第一话" />
+
+    <TextView
+        android:id="@+id/tv_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_lastWatchTime"
+        app:layout_constraintStart_toEndOf="@+id/iv_cover"
+        app:layout_constraintTop_toBottomOf="@+id/tv_episodeTitle"
+        app:layout_constraintVertical_bias="0.2"
+        tools:text="刚刚开始" />
+
 
     <TextView
         android:id="@+id/tv_lastWatchTime"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:gravity="center"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/iv_cover"
-        app:layout_constraintTop_toBottomOf="@id/tv_episodeTitle"
-        tools:text="刚刚观看" />
+        tools:text="19:27" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,7 +17,7 @@ class HistoryViewModel : ViewModel() {
     var isSelectModel = false
     val selectSet: MutableSet<WatchHistory> = mutableSetOf()
 
-    val watchHistoryList: MutableList<WatchHistory> = mutableListOf()
+    var watchHistoryList: MutableList<WatchHistory> = mutableListOf()
 
     val loadWatchHistorySuccess: MutableLiveData<Boolean> = MutableLiveData()
     val isSelectedAll: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -26,10 +26,7 @@ class HistoryViewModel : ViewModel() {
     fun loadAllWatchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                watchHistoryList.apply {
-                    clear()
-                    addAll(historyRepository.loadAllWatchHistory())
-                }
+                watchHistoryList =  historyRepository.loadAllWatchHistory()
                 loadWatchHistorySuccess.postValue(true)
             } catch (e: Exception) {
                 loadWatchHistorySuccess.postValue(false)

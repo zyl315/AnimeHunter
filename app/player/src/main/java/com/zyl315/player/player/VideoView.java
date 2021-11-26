@@ -18,14 +18,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.zyl315.player.R;
 import com.zyl315.player.controller.BaseVideoController;
 import com.zyl315.player.controller.MediaPlayerControl;
@@ -33,6 +25,14 @@ import com.zyl315.player.render.IRenderView;
 import com.zyl315.player.render.RenderViewFactory;
 import com.zyl315.player.util.L;
 import com.zyl315.player.util.PlayerUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * 播放器
@@ -189,6 +189,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
 
     /**
      * 第一次播放
+     *
      * @return 是否成功开始播放
      */
     protected boolean startPlay() {
@@ -297,6 +298,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
 
     /**
      * 设置播放数据
+     *
      * @return 播放数据是否设置成功
      */
     protected boolean prepareDataSource() {
@@ -358,6 +360,8 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     public void release() {
         if (!isInIdleState()) {
+            //保存播放进度
+            saveProgress();
             //释放播放器
             if (mMediaPlayer != null) {
                 mMediaPlayer.release();
@@ -384,8 +388,6 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
             }
             //关闭屏幕常亮
             mPlayerContainer.setKeepScreenOn(false);
-            //保存播放进度
-            saveProgress();
             //重置播放进度
             mCurrentPosition = 0;
             //切换转态
@@ -397,9 +399,9 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      * 保存播放进度
      */
     protected void saveProgress() {
-        if (mProgressManager != null && mCurrentPosition > 0) {
+        if (mProgressManager != null && getCurrentPosition() > 0) {
             L.d("saveProgress: " + mCurrentPosition);
-            mProgressManager.saveProgress(mUrl, mCurrentPosition);
+            mProgressManager.saveProgress(mUrl, getCurrentPosition(), getDuration());
         }
     }
 
@@ -448,7 +450,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     @Override
     public long getDuration() {
-        if (isInPlaybackState()) {
+        if (mMediaPlayer != null) {
             return mMediaPlayer.getDuration();
         }
         return 0;
@@ -459,7 +461,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     @Override
     public long getCurrentPosition() {
-        if (isInPlaybackState()) {
+        if (mMediaPlayer != null) {
             mCurrentPosition = mMediaPlayer.getCurrentPosition();
             return mCurrentPosition;
         }
@@ -566,7 +568,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
         mCurrentPosition = 0;
         if (mProgressManager != null) {
             //播放完成，清除进度
-            mProgressManager.saveProgress(mUrl, 0);
+            mProgressManager.saveProgress(mUrl, getCurrentPosition(), getDuration());
         }
         setPlayState(STATE_PLAYBACK_COMPLETED);
     }
@@ -1001,6 +1003,7 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     public interface OnStateChangeListener {
         void onPlayerStateChanged(int playerState);
+
         void onPlayStateChanged(int playState);
     }
 
@@ -1009,9 +1012,12 @@ public class VideoView<P extends AbstractPlayer> extends FrameLayout
      */
     public static class SimpleOnStateChangeListener implements OnStateChangeListener {
         @Override
-        public void onPlayerStateChanged(int playerState) {}
+        public void onPlayerStateChanged(int playerState) {
+        }
+
         @Override
-        public void onPlayStateChanged(int playState) {}
+        public void onPlayStateChanged(int playState) {
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.zyl315.animehunter.view.activity
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
@@ -22,6 +23,7 @@ import com.zyl315.animehunter.view.fragment.PlaySourceFragment
 import com.zyl315.animehunter.view.widget.BangumiVideoController
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 import com.zyl315.player.player.AbstractPlayer
+import com.zyl315.player.player.ProgressManager
 import com.zyl315.player.player.VideoView
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
@@ -91,28 +93,10 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
             tvExpand.setOnClickListener {
                 PlaySourceFragment(Gravity.BOTTOM).apply {
-                    backgroundColorId = R.color.design_default_color_background
+                    backgroundColorId = R.color.white
                 }.show(supportFragmentManager, R.id.fragment_container)
-
             }
         }
-
-        playerView.addOnStateChangeListener(object : VideoView.OnStateChangeListener {
-            override fun onPlayerStateChanged(playerState: Int) {
-
-            }
-
-            override fun onPlayStateChanged(playState: Int) {
-                when (playState) {
-                    VideoView.STATE_IDLE,
-                    VideoView.STATE_START_ABORT,
-                    VideoView.STATE_PAUSED,
-                    VideoView.STATE_PLAYBACK_COMPLETED -> {
-                        viewModel.saveWatchHistory(playerView.currentPosition, playerView.duration)
-                    }
-                }
-            }
-        })
     }
 
     private fun initData() {
@@ -175,7 +159,14 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 val uri = Uri.parse(viewModel.currentEpisodeBean.let {
                     return@let (Const.AgeFans.BASE_URL + it.href)
                 })
-                startActivity(Intent(Intent.ACTION_VIEW, uri))
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                if (packageManager.resolveActivity(
+                        intent,
+                        PackageManager.MATCH_DEFAULT_ONLY
+                    ) != null
+                ) {
+                    startActivity(intent)
+                }
             }.show()
         }
     }
@@ -183,18 +174,29 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun initPlayer() {
         playerController = BangumiVideoController(this)
         playerView.setVideoController(playerController)
+        playerView.setProgressManager(object : ProgressManager() {
+            override fun saveProgress(url: String?, progress: Long, duration: Long) {
+                viewModel.saveWatchProgress(url, progress, duration)
+            }
+
+            override fun getSavedProgress(url: String?): Long {
+                return viewModel.getWatchHistoryProgress()
+            }
+        })
     }
 
 
     private fun starPlay(episodeBean: EpisodeBean) {
         playerController.setTitle(episodeBean.title)
-        playerView.skipPositionWhenPlay(viewModel.getWatchHistoryPosition())
         playerView.setUrl(episodeBean.url)
         playerView.start()
     }
 
     override fun onPause() {
         super.onPause()
+        if(isFinishing) {
+            playerView.release()
+        }
         playerView.pause()
     }
 
@@ -202,12 +204,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         super.onResume()
         playerView.resume()
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        playerView.release()
-    }
-
 
     override fun onBackPressed() {
         if (BackHandlerHelper.handleBackPress(this)) {
@@ -220,6 +216,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     companion object {
-        const val BANGUMI_BEAN = "BANGUMI_TAG"
+        const val BANGUMI_BEAN = "BANGUMI_BEAN"
     }
 }

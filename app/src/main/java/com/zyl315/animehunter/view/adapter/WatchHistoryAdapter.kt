@@ -4,6 +4,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -11,15 +12,16 @@ import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.util.dp
+import com.zyl315.animehunter.util.translateTimeUnit
+import com.zyl315.animehunter.util.translateWatchPosition
 import com.zyl315.animehunter.view.activity.HistoryActivity
 import com.zyl315.animehunter.view.activity.PlayActivity
 import com.zyl315.animehunter.view.activity.PlayActivity.Companion.BANGUMI_BEAN
 import com.zyl315.animehunter.view.adapter.holder.WatchHistoryViewHolder
-import java.util.*
 
 class WatchHistoryAdapter(
     private val activity: HistoryActivity,
-    private val dataList: List<WatchHistory>,
+    var dataList: MutableList<WatchHistory>,
 ) : BaseRvAdapter(dataList) {
     private var selectModel = false
     private var selectSet: MutableSet<WatchHistory>
@@ -46,7 +48,8 @@ class WatchHistoryAdapter(
                     .into(ivCover)
                 tvBangumiTitle.text = item.bangumiBean.name
                 tvEpisodeTitle.text = item.episodeName
-                tvLastWatchTime.text = Date(item.time).toString()
+                tvDuration.text = translateWatchPosition(item.watchedPosition, item.duration)
+                tvLastWatchTime.text = translateTimeUnit(item.time)
                 rbSelect.apply {
                     if (selectModel) {
                         visibility = View.VISIBLE
@@ -81,5 +84,44 @@ class WatchHistoryAdapter(
         selectModel = false
         selectSet.clear()
         notifyDataSetChanged()
+    }
+
+    fun updateList(watchHistoryList: List<WatchHistory>) {
+        val diffResult = DiffUtil.calculateDiff(
+            WatchHistoryAdapter.DiffCallBack(
+                dataList,
+                watchHistoryList
+            )
+        )
+        diffResult.dispatchUpdatesTo(this)
+        dataList.apply {
+            clear()
+            addAll(watchHistoryList)
+        }
+    }
+
+    class DiffCallBack(
+        private var oldDataset: List<WatchHistory>?,
+        private val newDataset: List<WatchHistory>?
+    ) : DiffUtil.Callback() {
+
+
+        override fun getOldListSize(): Int {
+            return oldDataset?.size ?: 0
+        }
+
+        override fun getNewListSize(): Int {
+            return newDataset?.size ?: 0
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return areContentsTheSame(oldItemPosition, newItemPosition)
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldWatchHistory = oldDataset?.get(oldItemPosition)
+            val newWatchHistory = newDataset?.get(newItemPosition)
+            return oldWatchHistory == newWatchHistory
+        }
     }
 }

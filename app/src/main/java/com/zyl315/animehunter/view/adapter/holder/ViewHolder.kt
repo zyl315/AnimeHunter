@@ -29,6 +29,7 @@ class WatchHistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     val ivCover: ImageView = itemView.findViewById(R.id.iv_cover)
     val tvBangumiTitle: TextView = itemView.findViewById(R.id.tv_bangumiTitle)
     val tvEpisodeTitle: TextView = itemView.findViewById(R.id.tv_episodeTitle)
+    val tvDuration :TextView =itemView.findViewById(R.id.tv_duration)
     val tvLastWatchTime: TextView = itemView.findViewById(R.id.tv_lastWatchTime)
     val rbSelect: RadioButton = itemView.findViewById(R.id.rb_select)
 }
