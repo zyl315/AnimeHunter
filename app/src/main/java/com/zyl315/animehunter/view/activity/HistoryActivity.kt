@@ -3,7 +3,6 @@ package com.zyl315.animehunter.view.activity
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivityHistoryBinding
@@ -21,8 +20,8 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
-        historyAdapter = WatchHistoryAdapter(this, viewModel.watchHistoryList)
-
+        historyAdapter = WatchHistoryAdapter(this)
+        viewModel.watchHistoryList.observe(this) { list -> historyAdapter.submitList(list) }
         initView()
         observe()
     }
@@ -53,10 +52,10 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             rbSelectAll.setOnClickListener {
                 if (!viewModel.isSelectAll()) {
                     rbSelectAll.isChecked = true
-                    viewModel.selectSet.addAll(viewModel.watchHistoryList)
+                    viewModel.addAll()
                 } else {
                     rbSelectAll.isChecked = false
-                    viewModel.selectSet.clear()
+                    viewModel.clearAll()
                 }
                 updateUI()
             }
@@ -67,7 +66,6 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                 AlertDialog.Builder(this@HistoryActivity)
                     .setMessage(R.string.clear_the_selected_history)
                     .setPositiveButton(R.string.confirm) { _, _ ->
-                        viewModel.isSelectModel = false
                         viewModel.deleteHistory()
                     }
                     .setNegativeButton(R.string.cancel, null)
@@ -83,19 +81,11 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
 
     private fun observe() {
         viewModel.loadWatchHistorySuccess.observe(this) { success ->
-            if (success) {
-                historyAdapter.updateList(viewModel.watchHistoryList)
-            } else {
-                showToast(message = "加载观看历史失败")
-            }
+            if (!success) showToast(message = "加载观看历史失败")
         }
 
         viewModel.isSelectedAll.observe(this) { selectedAll ->
             mBinding.rbSelectAll.isChecked = selectedAll
-        }
-
-        viewModel.deleteHistorySuccess.observe(this) { success ->
-            if (success) updateUI()
         }
     }
 

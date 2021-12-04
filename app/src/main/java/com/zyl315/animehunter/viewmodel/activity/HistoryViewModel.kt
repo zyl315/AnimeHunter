@@ -17,17 +17,15 @@ class HistoryViewModel : ViewModel() {
     var isSelectModel = false
     val selectSet: MutableSet<WatchHistory> = mutableSetOf()
 
-    var watchHistoryList: MutableList<WatchHistory> = mutableListOf()
+    var watchHistoryList: MutableLiveData<MutableList<WatchHistory>> = MutableLiveData()
 
     val loadWatchHistorySuccess: MutableLiveData<Boolean> = MutableLiveData()
     val isSelectedAll: MutableLiveData<Boolean> = MutableLiveData(false)
-    val deleteHistorySuccess: MutableLiveData<Boolean> = MutableLiveData()
 
     fun loadAllWatchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                watchHistoryList =  historyRepository.loadAllWatchHistory()
-                loadWatchHistorySuccess.postValue(true)
+                watchHistoryList.postValue(historyRepository.loadAllWatchHistory())
             } catch (e: Exception) {
                 loadWatchHistorySuccess.postValue(false)
                 e.printStackTrace()
@@ -38,17 +36,26 @@ class HistoryViewModel : ViewModel() {
     fun deleteHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                historyRepository.deleteWatchHistory(*selectSet.toTypedArray())
-                watchHistoryList.removeAll(selectSet)
-                deleteHistorySuccess.postValue(true)
+                watchHistoryList.value.let {
+                    historyRepository.deleteWatchHistory(*selectSet.toTypedArray())
+                    loadAllWatchHistory()
+                    selectSet.clear()
+                }
             } catch (e: Exception) {
-                deleteHistorySuccess.postValue(false)
                 e.printStackTrace()
             }
         }
     }
 
+    fun addAll() {
+        watchHistoryList.value?.let { selectSet.addAll(it) }
+    }
+
+    fun clearAll() {
+        selectSet.clear()
+    }
+
     fun isSelectAll(): Boolean {
-        return selectSet.size == watchHistoryList.size
+        return selectSet.size == watchHistoryList.value?.size
     }
 }
