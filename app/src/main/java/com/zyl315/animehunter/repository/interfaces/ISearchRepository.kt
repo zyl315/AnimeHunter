@@ -6,6 +6,6 @@ interface ISearchRepository : IBaseRepository {
     suspend fun getSearchData(keyWord: String, page: Int): Pair<MutableList<BangumiBean>, String>
 
     companion object {
-        const val TAG = "SearchModel"
+        const val TAG = "SearchRepository"
     }
 }

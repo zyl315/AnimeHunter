@@ -11,6 +11,6 @@ interface IPlayRepository : IBaseRepository {
     suspend fun getPlayUrl(episodeBean: EpisodeBean, retryCount: Int = 3): EpisodeBean
 
     companion object {
-        const val TAG = "PlayerModel"
+        const val TAG = "PlayerRepository"
     }
 }

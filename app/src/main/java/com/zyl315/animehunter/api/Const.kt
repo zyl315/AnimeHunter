@@ -12,7 +12,8 @@ object Const {
         var SEARCH_URL = "$BASE_URL/search?query=%s&page=%s"
         var DETAIL_URL = "$BASE_URL/play/%s"
         var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
-        var PLAY_REFERER = "$BASE_URL/play/%s?playid=%s"
+        var CATALOG_URL = "$BASE_URL/catalog/"
+        var DEFAULT_CATALOG_URL = "$BASE_URL/catalog/all-all-all-all-all-time-1"
     }
 
     object ViewHolderType {

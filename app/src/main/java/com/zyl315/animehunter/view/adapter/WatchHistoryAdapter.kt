@@ -65,7 +65,7 @@ class WatchHistoryAdapter(
                     activity.viewModel.apply {
                         isSelectedAll.postValue(isSelectAll())
                     }
-                    notifyItemChanged(position)
+                    notifyItemChanged(holder.layoutPosition)
                 } else {
                     val intent = Intent(activity, PlayActivity::class.java)
                     intent.putExtra(BANGUMI_BEAN, item.bangumiBean)

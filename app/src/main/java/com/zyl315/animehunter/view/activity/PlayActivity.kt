@@ -25,6 +25,7 @@ import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 import com.zyl315.player.player.AbstractPlayer
 import com.zyl315.player.player.ProgressManager
 import com.zyl315.player.player.VideoView
+import com.zyl315.player.player.VideoViewManager
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private lateinit var viewModel: PlayViewModel
@@ -172,7 +173,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun initPlayer() {
+        VideoViewManager.instance().setPlayOnMobileNetwork(false)
         playerController = BangumiVideoController(this)
+        playerController
         playerView.setVideoController(playerController)
         playerView.setProgressManager(object : ProgressManager() {
             override fun saveProgress(url: String?, progress: Long, duration: Long) {
@@ -194,7 +197,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     override fun onPause() {
         super.onPause()
-        if(isFinishing) {
+        if (isFinishing) {
             playerView.release()
         }
         playerView.pause()

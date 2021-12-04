@@ -58,6 +58,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
                     rbSelectAll.isChecked = false
                     viewModel.selectSet.clear()
                 }
+                updateUI()
             }
 
             tvDelete.setOnClickListener {

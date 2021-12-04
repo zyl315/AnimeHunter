@@ -18,6 +18,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
             }
 
+            btnCatalog.setOnClickListener {
+                startActivity(Intent(this@MainActivity, CatalogActivity::class.java))
+            }
+
         }
     }
 

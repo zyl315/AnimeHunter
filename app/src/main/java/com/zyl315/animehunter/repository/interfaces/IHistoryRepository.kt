@@ -12,6 +12,6 @@ interface IHistoryRepository : IBaseRepository {
     suspend fun deleteWatchHistory(vararg watchHistory: WatchHistory)
 
     companion object {
-        const val TAG = "IHistoryModel"
+        const val TAG = "HistoryRepository"
     }
 }
