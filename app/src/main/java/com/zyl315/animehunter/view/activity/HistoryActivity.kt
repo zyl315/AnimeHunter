@@ -20,18 +20,19 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModelProvider(this).get(HistoryViewModel::class.java)
-        historyAdapter = WatchHistoryAdapter(this)
-        viewModel.watchHistoryList.observe(this) { list -> historyAdapter.submitList(list) }
         initView()
         observe()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         initData()
     }
 
     private fun initView() {
+        historyAdapter = WatchHistoryAdapter(this)
+        viewModel.watchHistoryList.observe(this) { list -> historyAdapter.submitList(list) }
+
         mBinding.run {
             rvHistoryList.layoutManager = LinearLayoutManager(this@HistoryActivity)
             rvHistoryList.adapter = historyAdapter
@@ -84,9 +85,7 @@ class HistoryActivity : BaseActivity<ActivityHistoryBinding>() {
             if (!success) showToast(message = "加载观看历史失败")
         }
 
-        viewModel.isSelectedAll.observe(this) { selectedAll ->
-            mBinding.rbSelectAll.isChecked = selectedAll
-        }
+
     }
 
     private fun updateUI() {

@@ -6,13 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
-import com.zyl315.animehunter.bean.age.CatalogShowBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
 import com.zyl315.animehunter.execption.NoModeDataException
 import com.zyl315.animehunter.repository.impls.agefans.CatalogRepository
-import com.zyl315.animehunter.repository.impls.agefans.SearchRepository
 import com.zyl315.animehunter.repository.interfaces.ICatalogRepository
-import com.zyl315.animehunter.repository.interfaces.ISearchRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -75,7 +72,7 @@ class CatalogViewModel : ViewModel() {
 
     fun loadMoreBangumi() {
         val nextPageUrl = catalogUrl.replace(
-            Regex("(name|time|%E7%82%B9%E5%87%BB%E9%87%8F)-(\\d)+"),
+            Regex("(name|time|点击量)-(\\d)+"),
             "\$1-${pageNumber}"
         )
         viewModelScope.launch(Dispatchers.IO) {

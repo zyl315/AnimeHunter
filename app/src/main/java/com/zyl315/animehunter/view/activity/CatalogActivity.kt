@@ -3,28 +3,29 @@ package com.zyl315.animehunter.view.activity
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.*
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.api.SearchStatus
+import com.zyl315.animehunter.bean.BaseBean
 import com.zyl315.animehunter.databinding.ActivityCatalogBinding
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.view.adapter.BangumiAdapter
 import com.zyl315.animehunter.view.adapter.CatalogAdapter
+import com.zyl315.animehunter.view.adapter.CatalogShowAdapter
 import com.zyl315.animehunter.viewmodel.activity.CatalogViewModel
 
 class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
+    val viewModel: CatalogViewModel by viewModels<CatalogViewModel>()
     lateinit var webView: WebView
-    lateinit var viewModel: CatalogViewModel
     lateinit var catalogAdapter: CatalogAdapter
+    lateinit var catalogShowAdapter: CatalogShowAdapter
     lateinit var bangumiAdapter: BangumiAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(CatalogViewModel::class.java)
-
         observe()
         initView()
         initListener()
@@ -90,15 +91,19 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             }
         }
 
+
         catalogAdapter = CatalogAdapter()
-        viewModel.catalogList.observe(this) { list -> catalogAdapter.submitList(list) }
+        viewModel.catalogList.observe(this) { list ->
+            catalogAdapter.submitList(list)
+            catalogShowAdapter.notifyDataSetChanged()
+        }
         bangumiAdapter = BangumiAdapter(this)
         viewModel.bangumiList.observe(this) { list -> bangumiAdapter.submitList(list) }
-
+        catalogShowAdapter = CatalogShowAdapter(this, listOf(object : BaseBean {}))
 
         mBinding.apply {
             rvCatalog.layoutManager = LinearLayoutManager(this@CatalogActivity)
-            rvCatalog.adapter = ConcatAdapter(catalogAdapter, bangumiAdapter)
+            rvCatalog.adapter = ConcatAdapter(catalogShowAdapter, bangumiAdapter)
             smartRefreshLayout.setEnableRefresh(false)
         }
     }

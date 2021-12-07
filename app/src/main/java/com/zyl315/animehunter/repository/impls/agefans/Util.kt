@@ -79,7 +79,7 @@ object Util {
 
         val searchList = document.getElementById("search-list")?.children()
 
-        var resultList = mutableListOf<CatalogTagBean>()
+        val resultList = mutableListOf<CatalogTagBean>()
 
         searchList?.forEach { li ->
             if (li.tagName() == "li") {
