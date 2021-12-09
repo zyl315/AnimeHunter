@@ -53,7 +53,7 @@ class BangumiAdapter(val activity: Activity) :
     companion object {
         val DIFF_CALLBACK = object : DiffUtil.ItemCallback<BangumiBean>() {
             override fun areItemsTheSame(oldItem: BangumiBean, newItem: BangumiBean): Boolean {
-                return oldItem.bangumiID == newItem.bangumiID
+                return oldItem == newItem
             }
 
             override fun areContentsTheSame(oldItem: BangumiBean, newItem: BangumiBean): Boolean {

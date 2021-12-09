@@ -18,7 +18,7 @@ import com.zyl315.animehunter.view.adapter.holder.EmptyViewHolder
 
 class SearchAdapter(
     private val activity: Activity,
-    private var dataList: List<BangumiBean>
+    private var dataList: MutableList<BangumiBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
 
 
@@ -70,5 +70,18 @@ class SearchAdapter(
         } else {
             Const.ViewHolderType.UNKNOWN
         }
+    }
+
+    fun insertList(newList: List<BangumiBean>) {
+        val oldListSize = dataList.size
+        dataList.clear()
+        dataList.addAll(newList)
+        notifyItemRangeInserted(oldListSize, newList.size - oldListSize)
+    }
+
+    fun submitList(newList: List<BangumiBean>) {
+        dataList.clear()
+        dataList.addAll(newList)
+        notifyDataSetChanged()
     }
 }
