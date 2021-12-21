@@ -61,7 +61,7 @@ class PlayRepository : IPlayRepository {
 
         val request = Request.Builder()
             .url(Const.AgeFans.BASE_URL + playUrl + "&r=${Math.random()}")
-            .addHeader("Referer", Const.AgeFans.BASE_URL + url)
+            .addHeader("Referer", Const.AgeFans.BASE_URL)
             .build()
 
         val response = client.newCall(request).execute()

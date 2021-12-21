@@ -3,76 +3,68 @@ package com.zyl315.animehunter.viewmodel.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.database.enity.WatchHistory
-import com.zyl315.animehunter.execption.IPCheckException
-import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.repository.impls.HistoryRepository
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansRepository
 import com.zyl315.animehunter.repository.impls.agefans.PlayRepository
 import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
 import com.zyl315.animehunter.repository.interfaces.IPlayRepository
+import com.zyl315.animehunter.repository.interfaces.ISourceRepository
+import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlayViewModel : ViewModel() {
-    private val playRepository: IPlayRepository = PlayRepository()
     private val historyModel: IHistoryRepository = HistoryRepository()
+    private val sourceRepository: ISourceRepository = AgeFansRepository()
 
-    var playSourceList: MutableList<PlaySourceBean> = mutableListOf()
+    var playSourceList: List<PlaySourceBean> = mutableListOf()
     var playSource: MutableList<EpisodeBean> = mutableListOf()
     var currentSourceIndex = 1
     var currentEpisodeIndex = 1
     var continuePlay = false
 
-    val playStatus: MutableLiveData<PlayStatus> = MutableLiveData()
-    val ipBanned: MutableLiveData<Boolean> = MutableLiveData()
-    val unSupportPlayType: MutableLiveData<Boolean> = MutableLiveData()
     val currentPlayTag: MutableLiveData<String> = MutableLiveData()
+
+    val playSourceState: MutableLiveData<RequestState<List<PlaySourceBean>>> = MutableLiveData()
+    val playUrlState: MutableLiveData<RequestState<String>> = MutableLiveData()
 
     lateinit var bangumi: BangumiBean
     lateinit var currentEpisodeBean: EpisodeBean
     lateinit var watchHistory: WatchHistory
 
-
     fun getPlaySource() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                playSourceList = playRepository.getPlaySource(bangumi.bangumiID)
-                playSourceList.forEachIndexed { index, playSourceBean ->
-                    if (continuePlay) {
-                        setPlaySource(currentSourceIndex)
-                    } else if (playSourceBean.select) {
-                        setPlaySource(index)
+        viewModelScope.launch {
+            playSourceState.value = sourceRepository.getPlaySource(bangumi.bangumiID).apply {
+                success {
+                    playSourceList = it.data
+                    playSourceList.forEachIndexed { index, playSourceBean ->
+                        if (continuePlay) {
+                            setPlaySource(currentSourceIndex)
+                        } else if (playSourceBean.select) {
+                            setPlaySource(index)
+                        }
                     }
                 }
-                playStatus.postValue(PlayStatus.GET_PLAY_SOURCE_SUCCESS)
-            } catch (e: Exception) {
-                playStatus.postValue(PlayStatus.GET_PLAY_SOURCE_FAILED)
-                e.printStackTrace()
             }
         }
     }
 
-
     fun getPlayUrl(position: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                setPlayEpisode(position)
-                if (currentEpisodeBean.url == "") {
-                    currentEpisodeBean.url = playRepository.getPlayUrl(currentEpisodeBean.href)
+        viewModelScope.launch {
+            setPlayEpisode(position)
+            var result = playUrlState.value
+            if (currentEpisodeBean.url.isBlank()) {
+                result = sourceRepository.getPlayUrl(currentEpisodeBean.href).apply {
+                    success {
+                        currentEpisodeBean.url = it.data
+                    }
                 }
-                playStatus.postValue(PlayStatus.GET_PLAY_URL_SUCCESS)
-            } catch (e: UnSupportPlayTypeException) {
-                unSupportPlayType.postValue(true)
-            } catch (e: IPCheckException) {
-                ipBanned.postValue(true)
-            } catch (e: Exception) {
-                playStatus.postValue(PlayStatus.GET_PLAY_URL_FAILED)
-                e.printStackTrace()
             }
+            playUrlState.postValue(result)
         }
     }
 
@@ -119,6 +111,7 @@ class PlayViewModel : ViewModel() {
     }
 
     private fun setPlayEpisode(position: Int) {
+        if (position < 0 || position > playSource.size) return
         currentEpisodeBean = playSource[position]
         currentEpisodeIndex = position
         currentPlayTag.postValue(getCurrentPlayTag())
@@ -128,7 +121,7 @@ class PlayViewModel : ViewModel() {
         if (!this::bangumi.isInitialized || !this::currentEpisodeBean.isInitialized || duration == 0L) {
             return
         }
-        if(url != currentEpisodeBean.url) {
+        if (url != currentEpisodeBean.url) {
             return
         }
         try {

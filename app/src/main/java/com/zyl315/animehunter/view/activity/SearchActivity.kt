@@ -28,7 +28,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
 
         bangumiAdapter = BangumiAdapter(this)
         viewModel.searchState.observe(this) { state ->
-            state.complete {
+            state.success {
                 it.data.apply {
                     bangumiAdapter.submitList(bangumiList.toList())
                     mBinding.smartRefresh.visible(currentPage == 1)

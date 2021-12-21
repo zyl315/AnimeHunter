@@ -11,23 +11,23 @@ import com.zyl315.animehunter.R
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.view.activity.PlayActivity
-import com.zyl315.animehunter.view.adapter.holder.CoverViewHolder
+import com.zyl315.animehunter.view.adapter.holder.BangumiCover1ViewHolder
 
 class BangumiAdapter(val activity: Activity) :
-    ListAdapter<BangumiBean, CoverViewHolder>(DIFF_CALLBACK) {
+    ListAdapter<BangumiBean, BangumiCover1ViewHolder>(DIFF_CALLBACK) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoverViewHolder {
-        return CoverViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BangumiCover1ViewHolder {
+        return BangumiCover1ViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_bangumi_cover, parent, false)
+                .inflate(R.layout.item_bangumi_cover_1, parent, false)
         )
 
     }
 
-    override fun onBindViewHolder(holder: CoverViewHolder, position: Int) {
+    override fun onBindViewHolder(holderBangumi: BangumiCover1ViewHolder, position: Int) {
         val item = getItem(position)
 
-        holder.apply {
+        holderBangumi.apply {
             Glide.with(activity).load(item.coverUrl).into(ivCover)
             tvNewName.text = item.newName
             if (item.newName.isBlank()) tvNewName.gone()
@@ -39,7 +39,7 @@ class BangumiAdapter(val activity: Activity) :
             tvPlotType.text = item.plotType.run { "剧情类型：$this" }
         }
 
-        holder.itemView.setOnClickListener {
+        holderBangumi.itemView.setOnClickListener {
             activity.startActivity(
                 Intent(
                     activity,

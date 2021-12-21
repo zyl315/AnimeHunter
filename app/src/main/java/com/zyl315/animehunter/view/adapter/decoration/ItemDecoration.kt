@@ -20,24 +20,17 @@ class BangumiItemDecoration : RecyclerView.ItemDecoration() {
 
         if (spanSize == 1) {
             when (spanIndex) {
-                // 16+x=y+5/2
-                // x+y=5
-                // x=-4.25 y=9.25
                 0 -> {
-                    outRect.left = 16.dp
-                    outRect.right = -(4.25f).dp // -4.25
+                    outRect.left = 8.dp
+                    outRect.right = -(4.25f).dp
                 }
                 1 -> {
-                    outRect.left = 9.25f.dp   // 9.25
-                    outRect.right = 2.5f.dp   // 测试机5dp==15px
+                    outRect.left = 4.dp
+                    outRect.right = 4.dp
                 }
                 2 -> {
-                    outRect.left = 2.5f.dp
-                    outRect.right = 9.25f.dp  // 9.25
-                }
-                3 -> {
-                    outRect.left = -(4.25f).dp   // -4.25
-                    outRect.right = 16.dp
+                    outRect.left = 4.dp
+                    outRect.right = 8.dp
                 }
             }
         }

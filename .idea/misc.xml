@@ -3,12 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/drawable/ic_back_to_top.xml" value="0.362962962962963" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/activity_catalog.xml" value="0.3536458333333333" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/activity_main.xml" value="0.3482051282051282" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/activity_play.xml" value="0.3482051282051282" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/activity_search.xml" value="0.3482051282051282" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/fragment_play_source.xml" value="0.3482051282051282" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/item_bangumi_cover.xml" value="0.3482051282051282" />
+        <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/item_bangumi_cover_2.xml" value="0.4" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/item_bangumi_show_recycle_view.xml" value="0.3536458333333333" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/item_catalog_show_recycle_view.xml" value="0.3536458333333333" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/layout/item_catalog_tab.xml" value="0.3536458333333333" />

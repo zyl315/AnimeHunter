@@ -11,9 +11,15 @@ object MyOkHttpClient {
     }
 
     fun getDoc(url: String): String {
-        return client.newCall(
-            Request.Builder().url(url).build()
-        ).execute().body!!.string()
+        return getDoc(url, emptyMap())
     }
 
+    fun getDoc(url: String, header: Map<String, String>): String {
+        val builder = Request.Builder()
+        header.entries.forEach {
+            builder.addHeader(it.key, it.value)
+        }
+        builder.url(url)
+        return client.newCall(builder.build()).execute().body!!.string()
+    }
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="130dp"
+    android:layout_height="wrap_content"
+    android:paddingVertical="2dp">
+
+    <ImageView
+        android:id="@+id/iv_cover"
+        android:layout_width="120dp"
+        android:layout_height="160dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_newName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/shape_circle_color"
+        android:maxWidth="160dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="3dp"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/iv_cover"
+        app:layout_constraintEnd_toEndOf="@+id/iv_cover"
+        tools:text="23:00 第七集" />
+
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_cover"
+        tools:text="平家物语" />
+</androidx.constraintlayout.widget.ConstraintLayout>

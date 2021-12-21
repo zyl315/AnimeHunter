@@ -15,6 +15,8 @@ import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
+import com.zyl315.animehunter.execption.IPCheckException
+import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.util.BackHandlerHelper
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.view.adapter.PlaySourceAdapter
@@ -45,7 +47,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         initView()
         initListener()
         initPlayer()
-        initObserve()
     }
 
     private fun initView() {
@@ -103,44 +104,41 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun initData() {
         viewModel.bangumi = intent.getSerializableExtra(BANGUMI_BEAN) as BangumiBean
         viewModel.getWatchHistory()
-    }
 
-    private fun initObserve() {
-        viewModel.playStatus.observe(this) {
-            when (it) {
-                PlayStatus.GET_PLAY_SOURCE_SUCCESS -> {
-                    mBinding.tabPlaySource.apply {
-                        removeAllTabs()
-                        for (index in viewModel.playSourceList.indices) {
-                            addTab(
-                                newTab().setText("播放源${index + 1}"),
-                                index == viewModel.currentSourceIndex
-                            )
-                        }
-                    }
-                    if (viewModel.continuePlay) {
-                        viewModel.getPlayUrl(viewModel.currentEpisodeIndex)
+        viewModel.playSourceState.observe(this) { state ->
+            state.success {
+                mBinding.tabPlaySource.apply {
+                    removeAllTabs()
+                    for (index in viewModel.playSourceList.indices) {
+                        addTab(
+                            newTab().setText("播放源${index + 1}"),
+                            index == viewModel.currentSourceIndex
+                        )
                     }
                 }
+                if (viewModel.continuePlay) {
+                    viewModel.getPlayUrl(viewModel.currentEpisodeIndex)
+                }
+            }
 
-                PlayStatus.GET_PLAY_SOURCE_FAILED -> {
-                    showToast(resId = R.string.get_play_source_failed)
-                }
-
-                PlayStatus.GET_PLAY_URL_SUCCESS -> {
-                    starPlay(viewModel.currentEpisodeBean)
-                }
-
-                PlayStatus.GET_PLAY_URL_FAILED -> {
-                    showToast(resId = R.string.get_play_url_failed)
-                }
-                else -> {
-                }
+            state.error {
+                showToast(resId = R.string.get_play_source_failed)
             }
         }
 
-        viewModel.ipBanned.observe(this) {
-            if (it) showToast(message = "请求过于频繁")
+        viewModel.
+        playUrlState.observe(this) { state ->
+            state.success {
+                starPlay(viewModel.currentEpisodeBean)
+            }
+
+            state.error {
+                when (it.throwable) {
+                    is IPCheckException -> showToast(message = "请求过于频繁")
+                    is UnSupportPlayTypeException -> openInBrowser()
+                    else -> showToast(resId = R.string.get_play_url_failed)
+                }
+            }
         }
 
         viewModel.currentPlayTag.observe(this) {
@@ -149,26 +147,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 mPlaySourceAdapter.setSelectPosition(viewModel.currentEpisodeIndex)
             }
             playerView.release()
-        }
-
-        viewModel.unSupportPlayType.observe(this) {
-            Snackbar.make(
-                mBinding.playerView,
-                getString(R.string.unsupport_playback_links),
-                Snackbar.LENGTH_LONG
-            ).setAction(getString(R.string.confirm)) {
-                val uri = Uri.parse(viewModel.currentEpisodeBean.let {
-                    return@let (Const.AgeFans.BASE_URL + it.href)
-                })
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                if (packageManager.resolveActivity(
-                        intent,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                    ) != null
-                ) {
-                    startActivity(intent)
-                }
-            }.show()
         }
     }
 
@@ -193,6 +171,26 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         playerController.setTitle(episodeBean.title)
         playerView.setUrl(episodeBean.url)
         playerView.start()
+    }
+
+    private fun openInBrowser() {
+        Snackbar.make(
+            mBinding.playerView,
+            getString(R.string.unsupport_playback_links),
+            Snackbar.LENGTH_LONG
+        ).setAction(getString(R.string.confirm)) {
+            val uri = Uri.parse(viewModel.currentEpisodeBean.let {
+                return@let (Const.AgeFans.BASE_URL + it.href)
+            })
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            if (packageManager.resolveActivity(
+                    intent,
+                    PackageManager.MATCH_DEFAULT_ONLY
+                ) != null
+            ) {
+                startActivity(intent)
+            }
+        }.show()
     }
 
     override fun onPause() {

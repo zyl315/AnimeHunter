@@ -8,27 +8,36 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.view.activity.PlayActivity
 import com.zyl315.animehunter.view.activity.PlayActivity.Companion.BANGUMI_BEAN
-import com.zyl315.animehunter.view.adapter.holder.CoverViewHolder
+import com.zyl315.animehunter.view.adapter.holder.BangumiCover1ViewHolder
+import com.zyl315.animehunter.view.adapter.holder.BangumiCover2ViewHolder
 import com.zyl315.animehunter.view.adapter.holder.EmptyViewHolder
+import com.zyl315.animehunter.view.adapter.holder.ViewHolderType
 
-class SearchAdapter(
+class BangumiAdapter2(
     private val activity: Activity,
-    private var dataList: MutableList<BangumiBean> = mutableListOf()
+    private val coverType: Int,
+    private val dataList: MutableList<BangumiBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            Const.ViewHolderType.BangumiCover ->
-                CoverViewHolder(
+            ViewHolderType.BANGUMI_COVER_1 ->
+                BangumiCover1ViewHolder(
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_bangumi_cover, parent, false)
+                        .inflate(R.layout.item_bangumi_cover_1, parent, false)
                 )
+
+            ViewHolderType.BANGUMI_COVER_2 -> {
+                BangumiCover2ViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_bangumi_cover_2, parent, false)
+                )
+            }
             else ->
                 EmptyViewHolder(View(parent.context))
 
@@ -38,7 +47,7 @@ class SearchAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = dataList[position]
         when (holder) {
-            is CoverViewHolder -> {
+            is BangumiCover1ViewHolder -> {
                 holder.apply {
                     Glide.with(activity).load(item.coverUrl).into(ivCover)
                     tvNewName.text = item.newName
@@ -52,36 +61,42 @@ class SearchAdapter(
                 }
 
                 holder.itemView.setOnClickListener {
-                    activity.startActivity(
-                        Intent(
-                            activity,
-                            PlayActivity::class.java
-                        ).apply {
-                            putExtra(BANGUMI_BEAN, item)
-                        })
+                    startActivity(holder.bindingAdapterPosition)
+                }
+            }
+
+            is BangumiCover2ViewHolder -> {
+                holder.apply {
+                    Glide.with(activity).load(item.coverUrl).into(ivCover)
+                    tvNewName.text = item.newName
+                    if (item.newName.isBlank()) tvNewName.gone()
+                    tvName.text = item.name
+                }
+
+                holder.itemView.setOnClickListener {
+                    startActivity(holder.bindingAdapterPosition)
                 }
             }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position < dataList.size) {
-            Const.ViewHolderType.BangumiCover
-        } else {
-            Const.ViewHolderType.UNKNOWN
-        }
-    }
-
-    fun insertList(newList: List<BangumiBean>) {
-        val oldListSize = dataList.size
-        dataList.clear()
-        dataList.addAll(newList)
-        notifyItemRangeInserted(oldListSize, newList.size - oldListSize)
+        return coverType
     }
 
     fun submitList(newList: List<BangumiBean>) {
         dataList.clear()
         dataList.addAll(newList)
         notifyDataSetChanged()
+    }
+
+    private fun startActivity(position: Int) {
+        activity.startActivity(
+            Intent(
+                activity,
+                PlayActivity::class.java
+            ).apply {
+                putExtra(BANGUMI_BEAN, dataList[position])
+            })
     }
 }

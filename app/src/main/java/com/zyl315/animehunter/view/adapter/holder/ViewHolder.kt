@@ -12,11 +12,12 @@ import com.zyl315.animehunter.R
 object ViewHolderType {
     const val UNKNOWN = -1
     const val EMPTY = 0
-    const val COVER = 1
-    const val PLAY_SOURCE = 2
-    const val WATCH_HISTORY = 3
-    const val CATALOG_SHOW = 4
-    const val BANGUMI_SHOW = 5
+    const val BANGUMI_COVER_1 = 10000
+    const val BANGUMI_COVER_2 = 10001
+    const val PLAY_SOURCE = 20000
+    const val WATCH_HISTORY = 30000
+    const val CATALOG_SHOW = 40000
+    const val BANGUMI_SHOW = 50000
 }
 
 
@@ -24,7 +25,7 @@ class EmptyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 }
 
-class CoverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class BangumiCover1ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val ivCover: ImageView = itemView.findViewById(R.id.iv_cover)
     val tvNewName: TextView = itemView.findViewById(R.id.tv_newName)
     val tvName: TextView = itemView.findViewById(R.id.tv_name)
@@ -32,6 +33,12 @@ class CoverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvPremiereTime: TextView = itemView.findViewById(R.id.tv_premiereTime)
     val tvPlayStatus: TextView = itemView.findViewById(R.id.tv_playStatus)
     val tvPlotType: TextView = itemView.findViewById(R.id.tv_plotType)
+}
+
+class BangumiCover2ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    val ivCover: ImageView = itemView.findViewById(R.id.iv_cover)
+    val tvNewName: TextView = itemView.findViewById(R.id.tv_newName)
+    val tvName: TextView = itemView.findViewById(R.id.tv_name)
 }
 
 class PlaySourceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

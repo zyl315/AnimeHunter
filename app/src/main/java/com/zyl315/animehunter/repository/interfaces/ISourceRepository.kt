@@ -1,6 +1,9 @@
 package com.zyl315.animehunter.repository.interfaces
 
+import android.webkit.WebView
+import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
+import java.lang.ref.WeakReference
 
 sealed class RequestState<out T> {
     object Loading : RequestState<Nothing>()
@@ -8,7 +11,7 @@ sealed class RequestState<out T> {
     data class Error(val throwable: Throwable? = null, val msg: String? = null) :
         RequestState<Nothing>()
 
-    inline fun complete(block: (Success<T>) -> Unit): RequestState<T> {
+    inline fun success(block: (Success<T>) -> Unit): RequestState<T> {
         if (this is Success) {
             block(this)
         }
@@ -23,14 +26,28 @@ sealed class RequestState<out T> {
     }
 }
 
-interface ISourceRepository : ISearchParser {
+interface ISourceRepository : ISearchParser, IPlayParser {
 
 
 }
 
 interface ISearchParser {
-    suspend fun getSearchData(
-        keyword: String,
-        page: Int
+    suspend fun getSearchData(keyword: String, page: Int): RequestState<SearchResultBean>
+
+    suspend fun getBangumi(url: String, page: Int): RequestState<SearchResultBean>
+
+    suspend fun getMoreBangumi(url: String, page: Int): RequestState<SearchResultBean>
+
+    suspend fun getCatalog(html: String): RequestState<SearchResultBean>
+
+    suspend fun getCatalog(
+        url: String,
+        webView: WeakReference<WebView>,
     ): RequestState<SearchResultBean>
+}
+
+interface IPlayParser {
+    suspend fun getPlaySource(bangumiId: String): RequestState<List<PlaySourceBean>>
+
+    suspend fun getPlayUrl(url: String, retryCount: Int = 3): RequestState<String>
 }

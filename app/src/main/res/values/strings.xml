@@ -22,4 +22,5 @@
     <string name="clear_the_selected_history">清除选中的历史记录吗?</string>
     <string name="catalog">目录</string>
     <string name="total_record">共%s条记录</string>
+    <string name="back_to_top">回到顶部</string>
 </resources>

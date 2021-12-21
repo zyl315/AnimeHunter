@@ -25,3 +25,10 @@ class NoModeDataException : Exception {
     constructor(message: String) : super(message)
 }
 
+class WebViewException : Exception {
+    constructor() : super()
+
+    constructor(message: String) : super(message)
+}
+
+

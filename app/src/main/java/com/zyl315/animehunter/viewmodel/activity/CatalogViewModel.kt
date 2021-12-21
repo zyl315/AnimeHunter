@@ -4,17 +4,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.api.Const
-import com.zyl315.animehunter.api.SearchStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
-import com.zyl315.animehunter.execption.NoModeDataException
-import com.zyl315.animehunter.repository.impls.agefans.CatalogRepository
-import com.zyl315.animehunter.repository.interfaces.ICatalogRepository
-import kotlinx.coroutines.Dispatchers
+import com.zyl315.animehunter.bean.age.SearchResultBean
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansRepository
+import com.zyl315.animehunter.repository.interfaces.ISourceRepository
+import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 
 class CatalogViewModel : ViewModel() {
-    private val catalogRepository: ICatalogRepository = CatalogRepository()
+    private val sourceRepository: ISourceRepository = AgeFansRepository()
     var catalogUrl = Const.AgeFans.DEFAULT_CATALOG_URL
 
     var catalogList: MutableLiveData<List<CatalogTagBean>> = MutableLiveData()
@@ -22,42 +21,31 @@ class CatalogViewModel : ViewModel() {
 
     var bangumiList: MutableLiveData<List<BangumiBean>> = MutableLiveData()
 
-    var totalCount = "0"
-    var pageNumber = 1
+    var nextPage = 1
 
-    val getCatalogSuccess: MutableLiveData<Boolean> = MutableLiveData()
-    var searchResultStatus: MutableLiveData<SearchStatus> = MutableLiveData()
+    val catalogState: MutableLiveData<RequestState<SearchResultBean>> = MutableLiveData()
+    val bangumiState: MutableLiveData<RequestState<SearchResultBean>> = MutableLiveData()
 
-    fun getAllData(html: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            getCatalog(html)
-            getBangumi(html)
+    fun getCatalog(html: String) {
+        viewModelScope.launch {
+            catalogState.value =
+                sourceRepository.getCatalog(html).success {
+                    refreshCatalogList = it.data.catalogTagList!!
+                    if (catalogList.value == null) {
+                        catalogList.postValue(refreshCatalogList)
+                    }
+                    nextPage = it.data.currentPage + 1
+                }
         }
     }
 
 
-    private fun getCatalog(html: String) {
-        try {
-            refreshCatalogList = catalogRepository.getCatalog(html)
-            if (catalogList.value == null) {
-                catalogList.postValue(refreshCatalogList)
-            }
-        } catch (e: Exception) {
-            getCatalogSuccess.postValue(false)
-            e.printStackTrace()
-        }
-    }
-
-    private fun getBangumi(html: String, refresh: Boolean = true) {
-        try {
-            val result = catalogRepository.getBangumi(html)
-            bangumiList.postValue(result.first)
-            totalCount = result.second
-            pageNumber = 2
-            searchResultStatus.postValue(SearchStatus.SUCCESS)
-        } catch (e: Exception) {
-            searchResultStatus.postValue(SearchStatus.FAILED)
-            e.printStackTrace()
+    fun getMoreBangumi() {
+        viewModelScope.launch {
+            bangumiState.value = sourceRepository.getMoreBangumi(catalogUrl, nextPage)
+                .success {
+                    nextPage = it.data.currentPage + 1
+                }
         }
     }
 
@@ -68,26 +56,5 @@ class CatalogViewModel : ViewModel() {
             Const.AgeFans.CATALOG_URL + refreshCatalogList[catalogTagPosition].catalogItemBeanList[tabItemPosition].href
         }
         return catalogUrl
-    }
-
-    fun loadMoreBangumi() {
-        val nextPageUrl = catalogUrl.replace(
-            Regex("(name|time|点击量)-(\\d)+"),
-            "\$1-${pageNumber}"
-        )
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val result = catalogRepository.getMoreBangumi(nextPageUrl)
-                bangumiList.postValue(bangumiList.value?.plus(result.first))
-                totalCount = result.second
-                pageNumber++
-                searchResultStatus.postValue(SearchStatus.LOAD_MORE_SUCCESS)
-            } catch (e: NoModeDataException) {
-                searchResultStatus.postValue(SearchStatus.NO_MORE_DATA)
-            } catch (e: Exception) {
-                searchResultStatus.postValue(SearchStatus.LOAD_MORE_FAILED)
-                e.printStackTrace()
-            }
-        }
     }
 }

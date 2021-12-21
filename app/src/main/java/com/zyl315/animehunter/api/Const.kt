@@ -15,10 +15,4 @@ object Const {
         var CATALOG_URL = "$BASE_URL/catalog/"
         var DEFAULT_CATALOG_URL = "$BASE_URL/catalog/all-all-all-all-all-time-1"
     }
-
-    object ViewHolderType {
-        const val UNKNOWN = -1
-        const val EMPTY = 0
-        const val BangumiCover = 1
-    }
 }
