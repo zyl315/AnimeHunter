@@ -11,7 +11,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.api.Const
-import com.zyl315.animehunter.api.PlayStatus
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
@@ -95,7 +94,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
             tvExpand.setOnClickListener {
                 PlaySourceFragment(Gravity.BOTTOM).apply {
-                    backgroundColorId = R.color.white
+                    backgroundColorId = R.color.card_background
                 }.show(supportFragmentManager, R.id.fragment_container)
             }
         }
@@ -126,8 +125,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             }
         }
 
-        viewModel.
-        playUrlState.observe(this) { state ->
+        viewModel.playUrlState.observe(this) { state ->
             state.success {
                 starPlay(viewModel.currentEpisodeBean)
             }
@@ -153,7 +151,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun initPlayer() {
         VideoViewManager.instance().setPlayOnMobileNetwork(false)
         playerController = BangumiVideoController(this)
-        playerController
+        playerController.setEnableInNormal(true)
         playerView.setVideoController(playerController)
         playerView.setProgressManager(object : ProgressManager() {
             override fun saveProgress(url: String?, progress: Long, duration: Long) {

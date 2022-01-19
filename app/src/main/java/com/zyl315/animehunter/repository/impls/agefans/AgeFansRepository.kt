@@ -1,6 +1,7 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
 import android.webkit.WebView
+import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.MaxRetryException
@@ -257,8 +258,9 @@ class AgeFansRepository : ISourceRepository {
     }
 
     companion object {
-        var BASE_URL = "https://www.agefans.vip"
+        var BASE_URL = "https://www.agemys.com"
         var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
+        var DEFAULT_CATALOG_URL = "${BASE_URL}/catalog/all-all-all-all-all-time-1"
 
         fun packUrl(url: String): String {
             return when {

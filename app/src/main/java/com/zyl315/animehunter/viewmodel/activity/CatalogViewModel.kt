@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class CatalogViewModel : ViewModel() {
     private val sourceRepository: ISourceRepository = AgeFansRepository()
-    var catalogUrl = Const.AgeFans.DEFAULT_CATALOG_URL
+    var catalogUrl = AgeFansRepository.DEFAULT_CATALOG_URL
 
     var catalogList: MutableLiveData<List<CatalogTagBean>> = MutableLiveData()
     var refreshCatalogList: List<CatalogTagBean> = mutableListOf()

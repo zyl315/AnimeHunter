@@ -7,8 +7,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.util.dp
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.view.activity.PlayActivity
 import com.zyl315.animehunter.view.adapter.holder.BangumiCover1ViewHolder
@@ -28,7 +31,10 @@ class BangumiAdapter(val activity: Activity) :
         val item = getItem(position)
 
         holderBangumi.apply {
-            Glide.with(activity).load(item.coverUrl).into(ivCover)
+            Glide.with(activity)
+                .load(item.coverUrl)
+                .apply(RequestOptions().transform(RoundedCorners(5.dp)))
+                .into(ivCover)
             tvNewName.text = item.newName
             if (item.newName.isBlank()) tvNewName.gone()
 

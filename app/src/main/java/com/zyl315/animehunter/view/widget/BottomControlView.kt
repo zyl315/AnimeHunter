@@ -230,7 +230,7 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
         val activity = PlayerUtils.scanForActivity(context)
         if (activity is PlayActivity) {
             playSourceFragment = PlaySourceFragment(Gravity.END).apply {
-                backgroundColorId = R.color.background_black_70
+                backgroundColorId = R.color.black_70
                 showCloseIcon = false
             }
             playSourceFragment.show(

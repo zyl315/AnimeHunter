@@ -24,10 +24,6 @@ class BangumiItemDecoration : RecyclerView.ItemDecoration() {
                     outRect.left = 8.dp
                     outRect.right = -(4.25f).dp
                 }
-                1 -> {
-                    outRect.left = 4.dp
-                    outRect.right = 4.dp
-                }
                 2 -> {
                     outRect.left = 4.dp
                     outRect.right = 8.dp

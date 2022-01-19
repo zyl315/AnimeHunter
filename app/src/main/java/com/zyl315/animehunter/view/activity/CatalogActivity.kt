@@ -14,7 +14,6 @@ import com.zyl315.animehunter.util.visible
 import com.zyl315.animehunter.view.adapter.BangumiAdapter2
 import com.zyl315.animehunter.view.adapter.CatalogAdapter
 import com.zyl315.animehunter.view.adapter.CatalogShowAdapter
-import com.zyl315.animehunter.view.adapter.decoration.BangumiItemDecoration
 import com.zyl315.animehunter.view.adapter.holder.ViewHolderType
 import com.zyl315.animehunter.viewmodel.activity.CatalogViewModel
 
@@ -85,8 +84,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
 
         catalogAdapter = CatalogAdapter()
         viewModel.catalogList.observe(this) { list ->
-            catalogAdapter.submitList(list)
-            catalogShowAdapter.notifyDataSetChanged()
+            catalogAdapter.submitList(list.toList())
         }
         bangumiAdapter = BangumiAdapter2(this, ViewHolderType.BANGUMI_COVER_2)
         viewModel.bangumiList.observe(this) { list -> bangumiAdapter.submitList(list) }
@@ -106,7 +104,6 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                     }
                 }
             rvCatalog.adapter = ConcatAdapter(catalogShowAdapter, bangumiAdapter)
-            rvCatalog.addItemDecoration(BangumiItemDecoration())
             smartRefreshLayout.setEnableRefresh(false)
         }
     }
