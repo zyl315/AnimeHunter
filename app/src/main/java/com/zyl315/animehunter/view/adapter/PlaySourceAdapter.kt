@@ -10,7 +10,7 @@ import com.zyl315.animehunter.util.dp
 import com.zyl315.animehunter.view.adapter.holder.PlaySourceViewHolder
 
 class PlaySourceAdapter(
-    private var dataList: List<EpisodeBean>,
+    private var dataList: MutableList<EpisodeBean> = mutableListOf(),
     var orientation: Int,
     var currentPosition: Int,
     var onItemClickListener: onItemClickListener,
@@ -63,5 +63,12 @@ class PlaySourceAdapter(
         notifyItemChanged(position)
         notifyItemChanged(currentPosition)
         currentPosition = position
+    }
+
+    fun updateList(newList: List<EpisodeBean>, position: Int = 0) {
+        dataList.clear()
+        dataList.addAll(newList)
+        currentPosition = position
+        notifyDataSetChanged()
     }
 }

@@ -9,22 +9,22 @@ import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.repository.impls.HistoryRepository
 import com.zyl315.animehunter.repository.impls.agefans.AgeFansRepository
-import com.zyl315.animehunter.repository.impls.agefans.PlayRepository
 import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
-import com.zyl315.animehunter.repository.interfaces.IPlayRepository
 import com.zyl315.animehunter.repository.interfaces.ISourceRepository
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlayViewModel : ViewModel() {
-    private val historyModel: IHistoryRepository = HistoryRepository()
+    private val historyRepository: IHistoryRepository = HistoryRepository()
     private val sourceRepository: ISourceRepository = AgeFansRepository()
 
     var playSourceList: List<PlaySourceBean> = mutableListOf()
-    var playSource: MutableList<EpisodeBean> = mutableListOf()
-    var currentSourceIndex = 1
-    var currentEpisodeIndex = 1
+
+    var playSourceIndex = 0
+    var playEpisodeIndex = 0
+    var selectSourceIndex = 0
+
     var continuePlay = false
 
     val currentPlayTag: MutableLiveData<String> = MutableLiveData()
@@ -32,20 +32,18 @@ class PlayViewModel : ViewModel() {
     val playSourceState: MutableLiveData<RequestState<List<PlaySourceBean>>> = MutableLiveData()
     val playUrlState: MutableLiveData<RequestState<String>> = MutableLiveData()
 
-    lateinit var bangumi: BangumiBean
+    lateinit var bangumiBean: BangumiBean
     lateinit var currentEpisodeBean: EpisodeBean
     lateinit var watchHistory: WatchHistory
 
     fun getPlaySource() {
         viewModelScope.launch {
-            playSourceState.value = sourceRepository.getPlaySource(bangumi.bangumiID).apply {
+            playSourceState.value = sourceRepository.getPlaySource(bangumiBean.bangumiID).apply {
                 success {
                     playSourceList = it.data
                     playSourceList.forEachIndexed { index, playSourceBean ->
-                        if (continuePlay) {
-                            setPlaySource(currentSourceIndex)
-                        } else if (playSourceBean.select) {
-                            setPlaySource(index)
+                        if (!continuePlay) {
+                            playSourceIndex = index
                         }
                     }
                 }
@@ -55,7 +53,10 @@ class PlayViewModel : ViewModel() {
 
     fun getPlayUrl(position: Int) {
         viewModelScope.launch {
-            setPlayEpisode(position)
+            playEpisodeIndex = position
+            currentEpisodeBean = getEpisodeList(playSourceIndex)[playEpisodeIndex]
+            currentPlayTag.value = getCurrentPlayTag()
+
             var result = playUrlState.value
             if (currentEpisodeBean.url.isBlank()) {
                 result = sourceRepository.getPlayUrl(currentEpisodeBean.href).apply {
@@ -71,16 +72,16 @@ class PlayViewModel : ViewModel() {
     fun getWatchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                historyModel.loadWatchHistoryById(bangumi.bangumiID)?.let {
+                historyRepository.loadWatchHistoryById(bangumiBean.bangumiID)?.let {
                     watchHistory = it
-                    currentSourceIndex = watchHistory.dataSourceIndex
-                    currentEpisodeIndex = watchHistory.episodeIndex
+                    playSourceIndex = watchHistory.dataSourceIndex
+                    playEpisodeIndex = watchHistory.episodeIndex
                     continuePlay = true
                 }
+                getPlaySource()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            getPlaySource()
         }
     }
 
@@ -95,30 +96,16 @@ class PlayViewModel : ViewModel() {
         }
     }
 
-    fun equalToCurrentPlayTag(): Boolean {
-        return currentPlayTag.value == getCurrentPlayTag()
+    fun isCurrentPlaySource(): Boolean {
+        return selectSourceIndex == playSourceIndex
     }
 
     private fun getCurrentPlayTag(): String {
-        return "$currentSourceIndex$currentEpisodeIndex"
-    }
-
-    fun setPlaySource(index: Int) {
-        if (index < 0 || index >= playSourceList.size) return
-        currentSourceIndex = index
-        playSource.clear()
-        playSource.addAll(playSourceList[index].episodeList)
-    }
-
-    private fun setPlayEpisode(position: Int) {
-        if (position < 0 || position > playSource.size) return
-        currentEpisodeBean = playSource[position]
-        currentEpisodeIndex = position
-        currentPlayTag.postValue(getCurrentPlayTag())
+        return "$playSourceIndex$playEpisodeIndex"
     }
 
     fun saveWatchProgress(url: String?, currentPosition: Long, duration: Long) {
-        if (!this::bangumi.isInitialized || !this::currentEpisodeBean.isInitialized || duration == 0L) {
+        if (!this::bangumiBean.isInitialized || !this::currentEpisodeBean.isInitialized || duration == 0L) {
             return
         }
         if (url != currentEpisodeBean.url) {
@@ -126,16 +113,16 @@ class PlayViewModel : ViewModel() {
         }
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                historyModel.saveWatchHistory(
+                historyRepository.saveWatchHistory(
                     WatchHistory(
-                        bangumi.bangumiID,
+                        bangumiBean.bangumiID,
                         System.currentTimeMillis(),
-                        currentSourceIndex,
+                        playSourceIndex,
                         currentEpisodeBean.title,
-                        currentEpisodeIndex,
+                        playEpisodeIndex,
                         duration,
                         currentPosition,
-                        bangumi
+                        bangumiBean
                     )
                 )
             }
@@ -143,4 +130,21 @@ class PlayViewModel : ViewModel() {
             e.printStackTrace()
         }
     }
+
+
+    fun playNextEpisode() {
+        if (playEpisodeIndex < getEpisodeList(playSourceIndex).size - 1 ) {
+            getPlayUrl(playEpisodeIndex + 1)
+        }
+    }
+
+    fun getEpisodeList(sourceIndex: Int): MutableList<EpisodeBean> {
+        return if (sourceIndex < playSourceList.size) {
+            playSourceList[sourceIndex].episodeList
+        } else {
+            mutableListOf()
+        }
+    }
+
+    fun getSourceHost() = sourceRepository.host
 }

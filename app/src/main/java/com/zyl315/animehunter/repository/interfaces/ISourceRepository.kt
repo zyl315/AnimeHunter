@@ -27,8 +27,7 @@ sealed class RequestState<out T> {
 }
 
 interface ISourceRepository : ISearchParser, IPlayParser {
-
-
+    var host: String
 }
 
 interface ISearchParser {
@@ -50,4 +49,6 @@ interface IPlayParser {
     suspend fun getPlaySource(bangumiId: String): RequestState<List<PlaySourceBean>>
 
     suspend fun getPlayUrl(url: String, retryCount: Int = 3): RequestState<String>
+
+    fun getCatalogUrl(url: String): String
 }

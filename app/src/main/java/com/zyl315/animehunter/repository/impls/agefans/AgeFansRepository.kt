@@ -1,7 +1,6 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
 import android.webkit.WebView
-import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.MaxRetryException
@@ -13,6 +12,7 @@ import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.view.widget.MyWebViewClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -27,6 +27,8 @@ class AgeFansRepository : ISourceRepository {
     private val webClient: MyWebViewClient by lazy {
         MyWebViewClient()
     }
+
+    override var host: String = BASE_URL
 
     override suspend fun getSearchData(keyword: String, page: Int): RequestState<SearchResultBean> {
         val url = "search?query=$keyword&page=$page"
@@ -203,18 +205,28 @@ class AgeFansRepository : ISourceRepository {
                     throw IPCheckException()
                 }
 
-                val vurl = URLDecoder.decode(JSONObject(body).getString("vurl"))
+                val jsonObj = JSONObject(body)
+                val purl = jsonObj.getString("purl")
+                val vurl = URLDecoder.decode(jsonObj.getString("vurl"))
+                val playId = jsonObj.getString("playid")
 
-                if (!vurl.contains("http")) {
+                val _url = packUrl(purl + vurl).toHttpUrl().queryParameter("url").toString()
+
+
+                if (!_url.contains("http")) {
                     throw UnSupportPlayTypeException()
                 }
 
-                return@withContext RequestState.Success(vurl)
+                return@withContext RequestState.Success(URLDecoder.decode(_url))
             }.getOrElse {
                 it.printStackTrace()
                 return@withContext RequestState.Error(it)
             }
         }
+    }
+
+    override fun getCatalogUrl(url: String): String {
+        return "$BASE_URL/catalog/$url"
     }
 
     private fun processBangumiHtml(doc: Element, page: Int = 1): SearchResultBean {

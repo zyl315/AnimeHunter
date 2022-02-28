@@ -3,7 +3,6 @@ package com.zyl315.animehunter.viewmodel.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
@@ -51,9 +50,9 @@ class CatalogViewModel : ViewModel() {
 
     fun getCatalogUrl(catalogTagPosition: Int, tabItemPosition: Int): String {
         catalogUrl = if (refreshCatalogList.isEmpty()) {
-            Const.AgeFans.DEFAULT_CATALOG_URL
+            catalogUrl
         } else {
-            Const.AgeFans.CATALOG_URL + refreshCatalogList[catalogTagPosition].catalogItemBeanList[tabItemPosition].href
+            sourceRepository.getCatalogUrl(refreshCatalogList[catalogTagPosition].catalogItemBeanList[tabItemPosition].href)
         }
         return catalogUrl
     }

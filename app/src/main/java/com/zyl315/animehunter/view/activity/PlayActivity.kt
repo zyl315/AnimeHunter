@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.api.Const
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
@@ -29,7 +28,7 @@ import com.zyl315.player.player.VideoView
 import com.zyl315.player.player.VideoViewManager
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
-    private lateinit var viewModel: PlayViewModel
+    lateinit var viewModel: PlayViewModel
     private lateinit var mPlaySourceAdapter: PlaySourceAdapter
     private lateinit var playerView: VideoView<AbstractPlayer>
 
@@ -50,11 +49,12 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun initView() {
         mPlaySourceAdapter = PlaySourceAdapter(
-            viewModel.playSource,
+            viewModel.getEpisodeList(viewModel.playSourceIndex),
             GridLayoutManager.HORIZONTAL,
-            viewModel.currentEpisodeIndex,
+            viewModel.playEpisodeIndex,
             object : onItemClickListener {
                 override fun onItemClick(position: Int) {
+                    viewModel.playSourceIndex = viewModel.selectSourceIndex
                     viewModel.getPlayUrl(position)
                 }
             })
@@ -66,8 +66,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             rvPlayUrlList.adapter = mPlaySourceAdapter
             rvPlayUrlList.setHasFixedSize(true)
 
-            tvName.text = viewModel.bangumi.name
-            tvDescription.text = viewModel.bangumi.description
+            tvName.text = viewModel.bangumiBean.name
+            tvDescription.text = viewModel.bangumiBean.description
         }
     }
 
@@ -76,10 +76,11 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             tabPlaySource.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
-                        viewModel.setPlaySource(tab.position)
-                        mPlaySourceAdapter.currentPosition =
-                            if (viewModel.equalToCurrentPlayTag()) viewModel.currentEpisodeIndex else -1
-                        mPlaySourceAdapter.notifyDataSetChanged()
+                        viewModel.selectSourceIndex = tab.position
+                        mPlaySourceAdapter.updateList(
+                            viewModel.playSourceList[tab.position].episodeList,
+                            if (viewModel.isCurrentPlaySource()) viewModel.playEpisodeIndex else -1
+                        )
                     }
                 }
 
@@ -93,15 +94,30 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             })
 
             tvExpand.setOnClickListener {
-                PlaySourceFragment(Gravity.BOTTOM).apply {
-                    backgroundColorId = R.color.card_background
-                }.show(supportFragmentManager, R.id.fragment_container)
+                val playSourceFragment =
+                    PlaySourceFragment(Gravity.BOTTOM)
+                playSourceFragment.backgroundColorId = R.color.card_background
+                playSourceFragment.show(supportFragmentManager, R.id.fragment_container)
             }
+
+            playerView.setOnStateChangeListener(object : VideoView.OnStateChangeListener {
+                override fun onPlayStateChanged(playState: Int) {
+                    if (playState == VideoView.STATE_PLAYBACK_COMPLETED) {
+                        viewModel.playNextEpisode()
+                    }
+                }
+
+                override fun onPlayerStateChanged(playerState: Int) {
+                    if (playerState == VideoView.PLAYER_FULL_SCREEN) {
+                        viewModel.selectSourceIndex = viewModel.playSourceIndex
+                    }
+                }
+            })
         }
     }
 
     private fun initData() {
-        viewModel.bangumi = intent.getSerializableExtra(BANGUMI_BEAN) as BangumiBean
+        viewModel.bangumiBean = intent.getSerializableExtra(BANGUMI_BEAN) as BangumiBean
         viewModel.getWatchHistory()
 
         viewModel.playSourceState.observe(this) { state ->
@@ -111,12 +127,12 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                     for (index in viewModel.playSourceList.indices) {
                         addTab(
                             newTab().setText("播放源${index + 1}"),
-                            index == viewModel.currentSourceIndex
+                            index == viewModel.playSourceIndex
                         )
                     }
                 }
                 if (viewModel.continuePlay) {
-                    viewModel.getPlayUrl(viewModel.currentEpisodeIndex)
+                    viewModel.getPlayUrl(viewModel.playEpisodeIndex)
                 }
             }
 
@@ -140,9 +156,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         }
 
         viewModel.currentPlayTag.observe(this) {
-            if (viewModel.equalToCurrentPlayTag()) {
-                mBinding.rvPlayUrlList.scrollToPosition(viewModel.currentEpisodeIndex)
-                mPlaySourceAdapter.setSelectPosition(viewModel.currentEpisodeIndex)
+            if (viewModel.isCurrentPlaySource()) {
+                mBinding.rvPlayUrlList.scrollToPosition(viewModel.playEpisodeIndex)
+                mPlaySourceAdapter.setSelectPosition(viewModel.playEpisodeIndex)
             }
             playerView.release()
         }
@@ -178,7 +194,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             Snackbar.LENGTH_LONG
         ).setAction(getString(R.string.confirm)) {
             val uri = Uri.parse(viewModel.currentEpisodeBean.let {
-                return@let (Const.AgeFans.BASE_URL + it.href)
+                return@let (viewModel.getSourceHost() + it.href)
             })
             val intent = Intent(Intent.ACTION_VIEW, uri)
             if (packageManager.resolveActivity(
@@ -202,6 +218,13 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     override fun onResume() {
         super.onResume()
         playerView.resume()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isFinishing) {
+            playerView.release()
+        }
     }
 
     override fun onBackPressed() {
