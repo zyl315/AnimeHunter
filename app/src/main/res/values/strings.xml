@@ -23,4 +23,8 @@
     <string name="catalog">目录</string>
     <string name="total_record">共%s条记录</string>
     <string name="back_to_top">回到顶部</string>
+    <string name="home">首页</string>
+    <string name="favor">收藏</string>
+    <string name="more">更多</string>
+    <string name="mine">我的</string>
 </resources>

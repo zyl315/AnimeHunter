@@ -13,6 +13,17 @@
     <color name="black_60">#99000000</color>
     <color name="black_70">#B3000000</color>
 
+
+    <!--    ac color-->
+    <color name="colorAcRed">#FD4C5C</color>
+    <color name="colorAcGray">#CDCDCD</color>
+    <color name="colorAcGreen">#8BC34A</color>
+    <color name="colorAcMenuBlack">#333333</color>
+    <color name="colorAcPrimaryWhite">#F7F7F7</color>
+    <color name="colorAcSecondaryWhite">#FFFFFF</color>
+    <color name="colorAcPrimaryBlack">#0C0C0C</color>
+    <color name="colorAcSecondaryBlack">#1E1E1E</color>
+
     <color name="card_background">@color/white</color>
     <color name="rv_item_bg">@color/gray</color>
 </resources>

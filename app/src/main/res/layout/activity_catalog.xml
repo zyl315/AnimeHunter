@@ -4,15 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.activity.CatalogActivity">
+    tools:context=".ui.activity.CatalogActivity">
 
-    <TextView
-        android:id="@+id/tv_result"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="success" />
+    <include
+        android:id="@+id/title_bar"
+        layout="@layout/layout_titlebar" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -31,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_result"
+        app:layout_constraintTop_toBottomOf="@id/title_bar"
         app:srlEnableLoadMoreWhenContentNotFull="false"
         tools:visibility="visible">
 

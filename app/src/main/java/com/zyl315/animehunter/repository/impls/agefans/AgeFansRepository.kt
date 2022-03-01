@@ -9,7 +9,7 @@ import com.zyl315.animehunter.execption.WebViewException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.interfaces.ISourceRepository
 import com.zyl315.animehunter.repository.interfaces.RequestState
-import com.zyl315.animehunter.view.widget.MyWebViewClient
+import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
