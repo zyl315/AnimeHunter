@@ -3,6 +3,7 @@ package com.zyl315.animehunter.repository.interfaces
 import android.webkit.WebView
 import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
+import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import java.lang.ref.WeakReference
 
 sealed class RequestState<out T> {
@@ -42,6 +43,7 @@ interface ISearchParser {
     suspend fun getCatalog(
         url: String,
         webView: WeakReference<WebView>,
+        webClient: MyWebViewClient
     ): RequestState<SearchResultBean>
 }
 

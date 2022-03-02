@@ -4,15 +4,16 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.*
 import androidx.activity.viewModels
-import androidx.recyclerview.widget.ConcatAdapter
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.bean.BaseBean
 import com.zyl315.animehunter.databinding.ActivityCatalogBinding
+import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.adapter.BangumiAdapter2
 import com.zyl315.animehunter.ui.adapter.CatalogAdapter
-import com.zyl315.animehunter.ui.adapter.CatalogShowAdapter
 import com.zyl315.animehunter.ui.adapter.holder.ViewHolderType
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.util.visible
@@ -22,22 +23,44 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
     val viewModel: CatalogViewModel by viewModels<CatalogViewModel>()
     lateinit var webView: WebView
     lateinit var catalogAdapter: CatalogAdapter
-    lateinit var catalogShowAdapter: CatalogShowAdapter
     lateinit var bangumiAdapter: BangumiAdapter2
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initView()
+        initWebView()
         initListener()
-        initData()
+        loadData(viewModel.catalogUrl)
     }
 
     override fun getBinding() = ActivityCatalogBinding.inflate(layoutInflater)
 
 
-    @SuppressLint("SetJavaScriptEnabled")
     private fun initView() {
+        catalogAdapter = CatalogAdapter()
+        viewModel.catalogList.observe(this) { list ->
+            catalogAdapter.submitList(list.toList())
+        }
+
+        bangumiAdapter = BangumiAdapter2(this, ViewHolderType.BANGUMI_COVER_2)
+        viewModel.bangumiList.observe(this) { list -> bangumiAdapter.submitList(list) }
+
+        mBinding.apply {
+            titleBar.ibLeftIcon.setOnClickListener { finish() }
+            titleBar.tvTitle.text = getString(R.string.catalog)
+            titleBar.tvRight.visible()
+
+            rvCatalog.layoutManager = LinearLayoutManager(this@CatalogActivity)
+            rvCatalog.adapter = catalogAdapter
+
+            rvBangumi.layoutManager = GridLayoutManager(this@CatalogActivity, 3)
+            rvBangumi.adapter = bangumiAdapter
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initWebView() {
         webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.addJavascriptInterface(this, HTML_OUT)
@@ -55,26 +78,114 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                 }
                 return super.shouldInterceptRequest(view, request)
             }
+
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+                viewModel.catalogState.value = RequestState.Error()
+            }
+        }
+    }
+
+    private fun initListener() {
+        catalogAdapter.onTabItemSelectedListener =
+            object : CatalogAdapter.OnTabItemSelectedListener {
+                override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
+                    mBinding.smartRefreshLayout.autoRefresh()
+                    loadData(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
+                }
+            }
+
+
+        mBinding.run {
+            smartRefreshLayout.setOnLoadMoreListener {
+                viewModel.getMoreBangumi()
+            }
+
+            smartRefreshLayout.setOnRefreshListener {
+                loadData(viewModel.catalogUrl)
+            }
+
+            rvBangumi.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val manager = recyclerView.layoutManager as GridLayoutManager
+                    val first = manager.findFirstVisibleItemPosition()
+                    if (first > 10) {
+                        mBinding.fabToTop.visible()
+                    } else {
+                        mBinding.fabToTop.gone()
+                    }
+                }
+            })
+
+
+            rvBangumi.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val manager = recyclerView.layoutManager as GridLayoutManager
+                    val first = manager.findFirstVisibleItemPosition()
+                    if (first > 10) {
+                        mBinding.fabToTop.visible()
+                    } else {
+                        mBinding.fabToTop.gone()
+                    }
+                }
+            })
+
+            fabToTop.setOnClickListener {
+//                val behavior =
+//                    (mBinding.appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior
+//                if (behavior is AppBarLayout.Behavior) {
+//                    val topAndBottomOffset = behavior.topAndBottomOffset
+//                    if (topAndBottomOffset != 0) {
+//                        behavior.topAndBottomOffset = 0
+//                    }
+//                }
+                mBinding.rvBangumi.scrollToPosition(0)
+            }
         }
 
         viewModel.catalogState.observe(this) { state ->
             state.success {
-                mBinding.smartRefreshLayout.setNoMoreData(false)
+                mBinding.run {
+                    smartRefreshLayout.setNoMoreData(false)
+                    smartRefreshLayout.finishRefresh()
+                    emptyView.hide()
+                }
                 bangumiAdapter.submitList(it.data.bangumiList.toList())
+//                val appBarChild = mBinding.appBarLayout.getChildAt(0)
+//                val appBarParams = appBarChild.layoutParams
+//                if (appBarParams is AppBarLayout.LayoutParams) {
+//                    appBarParams.scrollFlags = if (it.data.bangumiList.isEmpty()) {
+//                        AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+//                    } else {
+//                        AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+//                    }
+//                }
+//                appBarChild.layoutParams = appBarParams
             }
 
             state.error {
-
+                mBinding.smartRefreshLayout.finishRefresh(false)
+                mBinding.emptyView.show("加载失败", "点击重试") {
+                    loadData(viewModel.catalogUrl)
+                }
             }
         }
 
         viewModel.bangumiState.observe(this) { state ->
             state.success {
-                bangumiAdapter.submitList(it.data.bangumiList.toList())
-                mBinding.smartRefreshLayout.apply {
-                    setNoMoreData(it.data.isLastPage)
-                    finishLoadMore(true)
+                mBinding.apply {
+                    smartRefreshLayout.setNoMoreData(it.data.isLastPage)
+                    smartRefreshLayout.finishLoadMore(true)
+                    emptyView.hide()
                 }
+                bangumiAdapter.submitList(it.data.bangumiList.toList())
             }
 
             state.error {
@@ -82,74 +193,16 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             }
         }
 
-        catalogAdapter = CatalogAdapter()
-        viewModel.catalogList.observe(this) { list ->
-            catalogAdapter.submitList(list.toList())
-        }
-        bangumiAdapter = BangumiAdapter2(this, ViewHolderType.BANGUMI_COVER_2)
-        viewModel.bangumiList.observe(this) { list -> bangumiAdapter.submitList(list) }
-        catalogShowAdapter = CatalogShowAdapter(this, listOf(object : BaseBean {}))
+    }
 
-        mBinding.apply {
-            titleBar.ibLeftIcon.setOnClickListener { finish() }
-            titleBar.tvTitle.text = getString(R.string.catalog)
-            titleBar.tvRight.visible()
-
-
-            rvCatalog.layoutManager =
-                GridLayoutManager(this@CatalogActivity, 3).also {
-                    it.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(position: Int): Int {
-                            return if (position == 0) {
-                                3
-                            } else {
-                                1
-                            }
-                        }
-                    }
-                }
-            rvCatalog.adapter = ConcatAdapter(catalogShowAdapter, bangumiAdapter)
-            smartRefreshLayout.setEnableRefresh(false)
-        }
+    private fun loadData(url: String) {
+        mBinding.smartRefreshLayout.setNoMoreData(false)
+        webView.loadUrl(url)
     }
 
     @JavascriptInterface
     fun processHTML(html: String) {
         viewModel.getCatalog(html)
-    }
-
-    private fun initListener() {
-        catalogAdapter.onTabItemSelectedListener =
-            object : CatalogAdapter.OnTabItemSelectedListener {
-                override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
-                    webView.loadUrl(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
-                }
-            }
-        mBinding.smartRefreshLayout.setOnLoadMoreListener {
-            viewModel.getMoreBangumi()
-        }
-
-        mBinding.rvCatalog.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val manager = recyclerView.layoutManager as GridLayoutManager
-                val first = manager.findFirstVisibleItemPosition()
-                if(first > 10) {
-                    mBinding.fabToTop.visible()
-                } else {
-                    mBinding.fabToTop.gone()
-                }
-            }
-        })
-
-        mBinding.fabToTop.setOnClickListener {
-            mBinding.rvCatalog.scrollToPosition(0)
-        }
-    }
-
-    private fun initData() {
-        webView.loadUrl(viewModel.catalogUrl)
-        mBinding.smartRefreshLayout.setNoMoreData(false)
     }
 
     companion object {

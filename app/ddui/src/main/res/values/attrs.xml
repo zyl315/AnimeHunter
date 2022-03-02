@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- EmptyView start -->
+    <declare-styleable name="DDUIEmptyView">
+        <attr name="ddui_show_loading" format="boolean"/>
+        <attr name="ddui_title_text" format="string"/>
+        <attr name="ddui_detail_text" format="string"/>
+        <attr name="ddui_btn_text" format="string"/>
+    </declare-styleable>
+    <!-- EmptyView end -->
+</resources>

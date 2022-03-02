@@ -55,6 +55,7 @@ dependencies {
 
 
     implementation project(path: ':app:player')
+    implementation project(path: ':app:ddui')
 
     implementation 'org.jsoup:jsoup:1.14.3'
     //OkHttp

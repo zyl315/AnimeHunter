@@ -2,20 +2,15 @@ package com.zyl315.animehunter.ui.widget
 
 import android.webkit.*
 
-class MyWebViewClient : WebViewClient() {
-    inner class JsObject {
-        @JavascriptInterface
-        fun processHtml(html: String) {
-            onComplete?.let {
-                it(html)
-            }
-        }
-    }
-
+class MyWebViewClient(private var webView: WebView) : WebViewClient() {
     private val jsObject = JsObject()
 
     var onComplete: ((String) -> Unit)? = null
     var onError: (() -> Unit)? = null
+
+    init {
+        webView.addJavascriptInterface(this, JAVA_OBJ)
+    }
 
     override fun shouldInterceptRequest(
         view: WebView?,
@@ -28,9 +23,9 @@ class MyWebViewClient : WebViewClient() {
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
-        view?.loadUrl("javascript:window.JAVA_OBJ.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');")
+        webView.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');")
     }
+
 
     override fun onReceivedError(
         view: WebView?,
@@ -45,16 +40,29 @@ class MyWebViewClient : WebViewClient() {
         onError = null
     }
 
-    fun addJavascriptInterface(webView: WebView?) {
-        webView?.addJavascriptInterface(jsObject, JAVA_OBJ)
+
+    fun removeJavascriptInterface() {
+        webView.removeJavascriptInterface(JAVA_OBJ)
     }
 
-    fun removeJavascriptInterface(webView: WebView?) {
-        webView?.removeJavascriptInterface(JAVA_OBJ)
+    @JavascriptInterface
+    fun processHtml(html: String) {
+        onComplete?.let {
+            it(html)
+        }
     }
 
 
     companion object {
-        const val JAVA_OBJ = "JAVA_OBJ"
+        const val JAVA_OBJ = "HTMLOUT"
+    }
+
+    inner class JsObject {
+        @JavascriptInterface
+        fun processHtml(html: String) {
+            onComplete?.let {
+                it(html)
+            }
+        }
     }
 }

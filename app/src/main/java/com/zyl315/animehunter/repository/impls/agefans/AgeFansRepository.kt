@@ -24,9 +24,7 @@ class AgeFansRepository : ISourceRepository {
 
     private val mBangumiList: MutableList<BangumiBean> = mutableListOf()
     private var totalCount = 0
-    private val webClient: MyWebViewClient by lazy {
-        MyWebViewClient()
-    }
+
 
     override var host: String = BASE_URL
 
@@ -91,7 +89,8 @@ class AgeFansRepository : ISourceRepository {
 
     override suspend fun getCatalog(
         url: String,
-        webView: WeakReference<WebView>
+        webView: WeakReference<WebView>,
+        webClient: MyWebViewClient
     ): RequestState<SearchResultBean> {
         val countDownLatch: CountDownLatch = CountDownLatch(1)
         var result: RequestState<SearchResultBean> =
@@ -143,7 +142,7 @@ class AgeFansRepository : ISourceRepository {
             }
             countDownLatch.await()
             withContext(Dispatchers.Main) {
-                webClient.removeJavascriptInterface(webView.get())
+                webClient.removeJavascriptInterface()
                 webClient.onError = null
                 webClient.onComplete = null
                 webView.get()?.loadUrl("")

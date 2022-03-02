@@ -27,4 +27,10 @@
     <string name="favor">收藏</string>
     <string name="more">更多</string>
     <string name="mine">我的</string>
+
+
+
+    <string name="emptyView_mode_desc_fail_title">加载失败</string>
+    <string name="emptyView_mode_desc_fail_desc">请检测网络是否能正常连接</string>
+    <string name="emptyView_mode_desc_retry">点击重试</string>
 </resources>

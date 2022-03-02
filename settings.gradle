@@ -1,3 +1,4 @@
 rootProject.name = "AnimeHunter"
 include ':app'
 include ':app:player'
+include ':app:ddui'
