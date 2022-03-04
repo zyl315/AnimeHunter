@@ -10,14 +10,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.bean.age.BangumiBean
-import com.zyl315.animehunter.util.dp
-import com.zyl315.animehunter.util.gone
+import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.ui.activity.PlayActivity
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover1ViewHolder
+import com.zyl315.animehunter.util.dp
+import com.zyl315.animehunter.util.gone
 
 class BangumiAdapter(val activity: Activity) :
-    ListAdapter<BangumiBean, BangumiCover1ViewHolder>(DIFF_CALLBACK) {
+    ListAdapter<BangumiDetailBean, BangumiCover1ViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BangumiCover1ViewHolder {
         return BangumiCover1ViewHolder(
@@ -51,18 +51,24 @@ class BangumiAdapter(val activity: Activity) :
                     activity,
                     PlayActivity::class.java
                 ).apply {
-                    putExtra(PlayActivity.BANGUMI_BEAN, item)
+                    putExtra(PlayActivity.BANGUMI_ID, item.bangumiID)
                 })
         }
     }
 
     companion object {
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<BangumiBean>() {
-            override fun areItemsTheSame(oldItem: BangumiBean, newItem: BangumiBean): Boolean {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<BangumiDetailBean>() {
+            override fun areItemsTheSame(
+                oldItem: BangumiDetailBean,
+                newItem: BangumiDetailBean
+            ): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: BangumiBean, newItem: BangumiBean): Boolean {
+            override fun areContentsTheSame(
+                oldItem: BangumiDetailBean,
+                newItem: BangumiDetailBean
+            ): Boolean {
                 return oldItem == newItem
             }
 

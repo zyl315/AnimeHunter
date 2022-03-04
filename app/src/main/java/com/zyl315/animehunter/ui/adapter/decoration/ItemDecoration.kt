@@ -22,11 +22,15 @@ class BangumiItemDecoration : RecyclerView.ItemDecoration() {
             when (spanIndex) {
                 0 -> {
                     outRect.left = 8.dp
-                    outRect.right = -(4.25f).dp
                 }
-                2 -> {
+
+                1 -> {
                     outRect.left = 4.dp
-                    outRect.right = 8.dp
+                    outRect.right = 4.dp
+                }
+
+                2-> {
+                    outRect.left = 0.dp
                 }
             }
         }

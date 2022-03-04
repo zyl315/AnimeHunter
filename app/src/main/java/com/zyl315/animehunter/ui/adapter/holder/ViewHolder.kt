@@ -16,8 +16,6 @@ object ViewHolderType {
     const val BANGUMI_COVER_2 = 10001
     const val PLAY_SOURCE = 20000
     const val WATCH_HISTORY = 30000
-    const val CATALOG_SHOW = 40000
-    const val BANGUMI_SHOW = 50000
 }
 
 
@@ -41,6 +39,11 @@ class BangumiCover2ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView
     val tvName: TextView = itemView.findViewById(R.id.tv_name)
 }
 
+class HomeContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
+    val rvBangumi: RecyclerView = itemView.findViewById(R.id.rv_bangumi)
+}
+
 class PlaySourceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvEpisode: TextView = itemView.findViewById(R.id.tv_episode)
 }
@@ -58,12 +61,7 @@ class CatalogShowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
     val rvCatalogShow: RecyclerView = itemView.findViewById(R.id.rv_catalog_show)
 }
 
-class BangumiShowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val smartRefresh: SmartRefreshLayout = itemView.findViewById(R.id.smart_refresh_layout)
-    val rvBangumiShow: RecyclerView = itemView.findViewById(R.id.rv_bangumi_show)
-}
-
 class CatalogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tabName: TextView = itemView.findViewById(R.id.tv_tabName)
+//    val tabName: TextView = itemView.findViewById(R.id.tv_tabName)
     val tabLayout: TabLayout = itemView.findViewById(R.id.tab_layout)
 }

@@ -1,13 +1,13 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
-import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.bean.age.CatalogItemBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
 import com.zyl315.animehunter.execption.NoModeDataException
 import org.jsoup.Jsoup
 
 object Util {
-    fun processBangumi(body: String): Pair<MutableList<BangumiBean>, String> {
+    fun processBangumi(body: String): Pair<MutableList<BangumiDetailBean>, String> {
         val document = Jsoup.parse(body)
 
         val totalCount = document.getElementById("result_count")?.text() ?: "0"
@@ -19,7 +19,7 @@ object Util {
 
         val elements = blockContent[0].getElementsByClass("cell")
 
-        val resultList: MutableList<BangumiBean> = mutableListOf()
+        val resultList: MutableList<BangumiDetailBean> = mutableListOf()
 
         elements.forEach { element ->
             var name = ""
@@ -55,7 +55,7 @@ object Util {
             }
 
             resultList.add(
-                BangumiBean(bangumiId).also {
+                BangumiDetailBean(bangumiId).also {
                     it.name = name
                     it.bangumiType = infoMap["动画种类"] ?: ""
                     it.originalName = infoMap["原版名称"] ?: ""

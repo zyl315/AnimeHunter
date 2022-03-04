@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragment.HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="?attr/colorPrimaryVariant"
@@ -17,11 +18,23 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginHorizontal="16dp"
-            android:src="@drawable/ic_catalog"
             android:scaleType="centerCrop"
+            android:src="@drawable/ic_catalog"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_history"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginHorizontal="16dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_history"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
 
         <TextView
             android:id="@+id/tv_search"
@@ -29,9 +42,9 @@
             android:layout_height="32dp"
             android:layout_marginHorizontal="16dp"
             android:background="@drawable/shape_rectangle_color"
-            android:paddingStart="8dp"
-            android:hint="@string/search"
             android:gravity="center_vertical"
+            android:hint="@string/search"
+            android:paddingHorizontal="8dp"
             app:drawableStartCompat="@drawable/ic_baseline_search_24"
             app:layout_constraintBottom_toBottomOf="parent"
 
@@ -39,18 +52,32 @@
             app:layout_constraintStart_toEndOf="@+id/iv_catalog"
             app:layout_constraintTop_toTopOf="parent" />
 
-
-        <ImageView
-            android:id="@+id/iv_history"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginHorizontal="16dp"
-            android:src="@drawable/ic_history"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>
+
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/smart_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topLayout"
+        app:srlEnableLoadMore="false">
+
+        <com.scwang.smart.refresh.header.ClassicsHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srlEnableLastTime="false" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_homepage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+
+    <com.zyl315.ddui.widget.DDUIEmptyView
+        android:id="@+id/ddui_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:ddui_show_loading="true"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

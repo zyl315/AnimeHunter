@@ -13,7 +13,7 @@ import com.zyl315.animehunter.R
 import com.zyl315.animehunter.database.enity.WatchHistory
 import com.zyl315.animehunter.ui.activity.HistoryActivity
 import com.zyl315.animehunter.ui.activity.PlayActivity
-import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_BEAN
+import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_ID
 import com.zyl315.animehunter.ui.adapter.holder.WatchHistoryViewHolder
 import com.zyl315.animehunter.util.dp
 import com.zyl315.animehunter.util.translateTimeUnit
@@ -66,7 +66,7 @@ class WatchHistoryAdapter(
                 notifyItemChanged(holder.layoutPosition)
             } else {
                 val intent = Intent(activity, PlayActivity::class.java)
-                intent.putExtra(BANGUMI_BEAN, item.bangumiBean)
+                intent.putExtra(BANGUMI_ID, item.bangumiBean.bangumiID)
                 activity.startActivity(intent)
             }
         }

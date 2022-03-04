@@ -33,4 +33,8 @@
     <string name="emptyView_mode_desc_fail_title">加载失败</string>
     <string name="emptyView_mode_desc_fail_desc">请检测网络是否能正常连接</string>
     <string name="emptyView_mode_desc_retry">点击重试</string>
+    <string name="still_loading">还在加载中！</string>
+    <string name="empty">空空无也</string>
+    <string name="loaded_failed">加载失败</string>
+    <string name="retry_click">点击重试</string>
 </resources>

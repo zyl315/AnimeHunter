@@ -7,11 +7,10 @@ import com.zyl315.animehunter.execption.MaxRetryException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.execption.WebViewException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
-import com.zyl315.animehunter.repository.interfaces.ISourceRepository
+import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -20,13 +19,23 @@ import java.lang.ref.WeakReference
 import java.net.URLDecoder
 import java.util.concurrent.CountDownLatch
 
-class AgeFansRepository : ISourceRepository {
-
-    private val mBangumiList: MutableList<BangumiBean> = mutableListOf()
+class AgeFansDataSource : AbstractDataSource() {
+    private val mBangumiDetailList: MutableList<BangumiDetailBean> = mutableListOf()
     private var totalCount = 0
 
 
-    override var host: String = BASE_URL
+    override fun getHost(): String = BASE_URL
+
+    override fun getDefaultCatalogUrl(): String = DEFAULT_CATALOG_URL
+
+    override suspend fun checkHost() {
+        withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                val response = MyOkHttpClient.getResponse(REFERRAL_URL)
+                BASE_URL = response.request.url.host
+            }
+        }
+    }
 
     override suspend fun getSearchData(keyword: String, page: Int): RequestState<SearchResultBean> {
         val url = "search?query=$keyword&page=$page"
@@ -151,7 +160,7 @@ class AgeFansRepository : ISourceRepository {
         return result
     }
 
-    override suspend fun getPlaySource(bangumiId: String): RequestState<List<PlaySourceBean>> {
+    override suspend fun getPlaySource(bangumiId: String): RequestState<PlayDetailResultBean> {
         return withContext(Dispatchers.IO) {
             val url = packUrl("/play/${bangumiId}")
             val doc = runCatching {
@@ -178,7 +187,38 @@ class AgeFansRepository : ISourceRepository {
                         playSourceList.add(sourceBean)
                     }
                 }
-                return@withContext RequestState.Success(playSourceList)
+                val infoList = mutableListOf<String>()
+                doc.select("#play_imform li span.play_imform_val").forEach {
+                    infoList.add(it.text())
+                }
+
+                val img = doc.select("#container > div:nth-child(5) div.blockcontent table a img")
+                val name = img.attr("alt")
+                val src = packUrl(img.attr("src"))
+
+                val desc = doc.select("div.play_desc p")[0].text()
+
+                val bangumiDetailBean = BangumiDetailBean(bangumiId).apply {
+                    this.name = name
+                    this.coverUrl = src
+                    this.newName = ""
+                    this.bangumiType = infoList.getOrElse(1) { "" }
+                    this.originalWork = infoList.getOrElse(2) { "" }
+                    this.originalName = infoList.getOrElse(3) { "" }
+                    this.otherName = infoList.getOrElse(4) { "" }
+                    this.productionCompany = infoList.getOrElse(5) { "" }
+                    this.premiereTime = infoList.getOrElse(6) { "" }
+                    this.playStatus = infoList.getOrElse(7) { "" }
+                    this.plotType = infoList.getOrElse(8) { "" }
+                    this.description = desc
+                }
+
+                return@withContext RequestState.Success(
+                    PlayDetailResultBean(
+                        playSourceList,
+                        bangumiDetailBean
+                    )
+                )
             }.onFailure {
                 return@withContext RequestState.Error(it)
             }
@@ -228,9 +268,21 @@ class AgeFansRepository : ISourceRepository {
         return "$BASE_URL/catalog/$url"
     }
 
+    override suspend fun getHomeContent(): RequestState<HomeResultBean> {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(BASE_URL)))
+                val resultBean = processHomeHtml(doc)
+                return@withContext RequestState.Success(resultBean)
+            }.getOrElse {
+                return@withContext RequestState.Error(it)
+            }
+        }
+    }
+
     private fun processBangumiHtml(doc: Element, page: Int = 1): SearchResultBean {
         if (page == 1) {
-            mBangumiList.clear()
+            mBangumiDetailList.clear()
             val resultCount = doc.getElementById("result_count")?.text() ?: "0"
             totalCount = Regex("\\d+").find(resultCount)!!.value.toInt()
         }
@@ -245,7 +297,7 @@ class AgeFansRepository : ISourceRepository {
                 infoList.add(cell.child(1).text())
             }
 
-            mBangumiList.add(BangumiBean(bangumiId).apply {
+            mBangumiDetailList.add(BangumiDetailBean(bangumiId).apply {
                 this.name = title
                 this.coverUrl = coverUrl
                 this.newName = newName
@@ -263,13 +315,37 @@ class AgeFansRepository : ISourceRepository {
         return SearchResultBean(
             totalCount,
             page,
-            totalCount == mBangumiList.size,
-            mBangumiList
+            totalCount == mBangumiDetailList.size,
+            mBangumiDetailList
         )
+    }
+
+    private fun processHomeHtml(doc: Element): HomeResultBean {
+        val contentList: MutableList<HomeContentBean> = mutableListOf()
+        val left = doc.select("#container > div.div_left.baseblock")[0]
+        left?.select("div.blocktitle")?.forEach { element ->
+            val title = element.child(0).text()
+            val bangumiBeanList: MutableList<BangumiBean> = mutableListOf()
+            element.nextElementSibling()!!.select("li.anime_icon1").forEach {
+                val bangumiId = it.child(0).attr("href").replaceFirst("/detail/", "")
+                val coverUrl = packUrl(it.child(0).child(0).attr("src"))
+                val name = it.child(0).child(0).attr("alt")
+                val newName = it.child(0).child(1).text()
+                bangumiBeanList.add(BangumiBean(bangumiId, name, newName, coverUrl))
+            }
+
+            contentList.add(
+                HomeContentBean(
+                    title, bangumiBeanList
+                )
+            )
+        }
+        return HomeResultBean(contentList)
     }
 
     companion object {
         var BASE_URL = "https://www.agemys.com"
+        var REFERRAL_URL = "https://dx.mbn98.com/?u=http://age.tv/&p=/"
         var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
         var DEFAULT_CATALOG_URL = "${BASE_URL}/catalog/all-all-all-all-all-time-1"
 

@@ -3,22 +3,22 @@ package com.zyl315.animehunter.viewmodel.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
-import com.zyl315.animehunter.repository.impls.agefans.AgeFansRepository
-import com.zyl315.animehunter.repository.interfaces.ISourceRepository
+import com.zyl315.animehunter.repository.datasource.AbstractDataSource
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 
 class CatalogViewModel : ViewModel() {
-    private val sourceRepository: ISourceRepository = AgeFansRepository()
-    var catalogUrl = AgeFansRepository.DEFAULT_CATALOG_URL
+    private val dataSource: AbstractDataSource = DataSourceManager.getDataSource()
+    var catalogUrl = dataSource.getDefaultCatalogUrl()
 
     var catalogList: MutableLiveData<List<CatalogTagBean>> = MutableLiveData()
     var refreshCatalogList: List<CatalogTagBean> = mutableListOf()
 
-    var bangumiList: MutableLiveData<List<BangumiBean>> = MutableLiveData()
+    var mBangumiDetailList: MutableLiveData<List<BangumiDetailBean>> = MutableLiveData()
 
     var nextPage = 1
 
@@ -28,7 +28,7 @@ class CatalogViewModel : ViewModel() {
     fun getCatalog(html: String) {
         viewModelScope.launch {
             catalogState.value =
-                sourceRepository.getCatalog(html).success {
+                dataSource.getCatalog(html).success {
                     refreshCatalogList = it.data.catalogTagList!!
                     if (catalogList.value == null) {
                         catalogList.postValue(refreshCatalogList)
@@ -38,10 +38,9 @@ class CatalogViewModel : ViewModel() {
         }
     }
 
-
     fun getMoreBangumi() {
         viewModelScope.launch {
-            bangumiState.value = sourceRepository.getMoreBangumi(catalogUrl, nextPage)
+            bangumiState.value = dataSource.getMoreBangumi(catalogUrl, nextPage)
                 .success {
                     nextPage = it.data.currentPage + 1
                 }
@@ -52,7 +51,7 @@ class CatalogViewModel : ViewModel() {
         catalogUrl = if (refreshCatalogList.isEmpty()) {
             catalogUrl
         } else {
-            sourceRepository.getCatalogUrl(refreshCatalogList[catalogTagPosition].catalogItemBeanList[tabItemPosition].href)
+            dataSource.getCatalogUrl(refreshCatalogList[catalogTagPosition].catalogItemBeanList[tabItemPosition].href)
         }
         return catalogUrl
     }

@@ -4,13 +4,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.bean.age.SearchResultBean
-import com.zyl315.animehunter.repository.impls.agefans.AgeFansRepository
-import com.zyl315.animehunter.repository.interfaces.ISourceRepository
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 
 class SearchViewModel : ViewModel() {
-    private val sourceRepository: ISourceRepository = AgeFansRepository()
+    private val dataSource  = DataSourceManager.getDataSource()
 
     val searchState: MutableLiveData<RequestState<SearchResultBean>> = MutableLiveData()
     var pageNumber: Int = 1
@@ -21,7 +20,7 @@ class SearchViewModel : ViewModel() {
         searchWord = keyWord
         pageNumber = page
         viewModelScope.launch {
-            searchState.value = sourceRepository.getSearchData(searchWord, pageNumber)
+            searchState.value = dataSource.getSearchData(searchWord, pageNumber)
         }
     }
 

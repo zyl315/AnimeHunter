@@ -12,3 +12,8 @@ data class EpisodeBean(val title: String, val href: String, var url: String = ""
     var playEx = ""
     var playId = ""
 }
+
+data class PlayDetailResultBean(
+    val playSourceBeanList: MutableList<PlaySourceBean>,
+    val bangumiDetailBean: BangumiDetailBean
+)

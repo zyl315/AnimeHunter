@@ -6,3 +6,10 @@ data class CatalogTagBean(
     var name: String,
     var catalogItemBeanList: MutableList<CatalogItemBean> = mutableListOf()
 ) : BaseBean
+
+data class CatalogItemBean(
+    var name: String,
+    var href: String,
+    var isSelected: Boolean
+) : BaseBean
+

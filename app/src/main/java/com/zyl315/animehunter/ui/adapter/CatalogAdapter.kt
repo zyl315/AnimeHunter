@@ -20,7 +20,7 @@ class CatalogAdapter : ListAdapter<CatalogTagBean, CatalogViewHolder>(DIFF_CALLB
 
     override fun onBindViewHolder(holder: CatalogViewHolder, position: Int) {
         val item = getItem(position)
-        holder.tabName.text = item.name
+//        holder.tabName.text = item.name
         holder.tabLayout.apply {
             removeAllTabs()
             item.catalogItemBeanList.forEach {
@@ -29,11 +29,11 @@ class CatalogAdapter : ListAdapter<CatalogTagBean, CatalogViewHolder>(DIFF_CALLB
             addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
+                        item.catalogItemBeanList[tab.position].isSelected = true
                         onTabItemSelectedListener?.onTabItemSelected(
                             holder.bindingAdapterPosition,
                             tab.position
                         )
-                        item.catalogItemBeanList[tab.position].isSelected = true
                     }
 
                 }
@@ -45,7 +45,12 @@ class CatalogAdapter : ListAdapter<CatalogTagBean, CatalogViewHolder>(DIFF_CALLB
                 }
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {
-                    //No implementation required
+                    tab?.let {
+                        onTabItemSelectedListener?.onTabItemSelected(
+                            holder.bindingAdapterPosition,
+                            tab.position
+                        )
+                    }
                 }
 
             })

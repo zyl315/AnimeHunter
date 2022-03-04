@@ -10,20 +10,20 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.bean.age.BangumiBean
-import com.zyl315.animehunter.util.dp
-import com.zyl315.animehunter.util.gone
+import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.ui.activity.PlayActivity
-import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_BEAN
+import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_ID
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover1ViewHolder
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover2ViewHolder
 import com.zyl315.animehunter.ui.adapter.holder.EmptyViewHolder
 import com.zyl315.animehunter.ui.adapter.holder.ViewHolderType
+import com.zyl315.animehunter.util.dp
+import com.zyl315.animehunter.util.gone
 
 class BangumiAdapter2(
     private val activity: Activity,
     private val coverType: Int,
-    private val dataList: MutableList<BangumiBean> = mutableListOf()
+    private val dataList: MutableList<BangumiDetailBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
 
 
@@ -93,7 +93,7 @@ class BangumiAdapter2(
         return coverType
     }
 
-    fun submitList(newList: List<BangumiBean>) {
+    fun submitList(newList: List<BangumiDetailBean>) {
         dataList.clear()
         dataList.addAll(newList)
         notifyDataSetChanged()
@@ -105,7 +105,7 @@ class BangumiAdapter2(
                 activity,
                 PlayActivity::class.java
             ).apply {
-                putExtra(BANGUMI_BEAN, dataList[position])
+                putExtra(BANGUMI_ID, dataList[position].bangumiID)
             })
     }
 }

@@ -30,7 +30,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
         viewModel.searchState.observe(this) { state ->
             state.success {
                 it.data.apply {
-                    bangumiAdapter.submitList(bangumiList.toList())
+                    bangumiAdapter.submitList(bangumiDetailList.toList())
                     mBinding.smartRefresh.visible(currentPage == 1)
                     mBinding.tvSearchTip.visible()
                     mBinding.tvSearchTip.text = getString(R.string.total_record).format(totalCount)

@@ -3,6 +3,13 @@ package com.zyl315.animehunter.bean.age
 import com.zyl315.animehunter.bean.BaseBean
 
 data class BangumiBean(
+    val bangumiID: String,
+    val name: String,
+    val newName: String,
+    val coverUrl: String? = null
+) : BaseBean
+
+data class BangumiDetailBean(
     var bangumiID: String
 ) : BaseBean {
     lateinit var name: String
@@ -18,3 +25,4 @@ data class BangumiBean(
     lateinit var coverUrl: String
     lateinit var newName: String
 }
+

@@ -6,23 +6,22 @@
     android:layout_height="wrap_content"
     android:paddingHorizontal="8dp">
 
-    <TextView
-        android:id="@+id/tv_tabName"
-        android:layout_width="40dp"
-        android:layout_height="35dp"
-        android:background="?attr/colorOnPrimary"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:id="@+id/tv_tabName"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="35dp"-->
+<!--        android:background="?attr/colorOnPrimary"-->
+<!--        android:gravity="center"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="35dp"
         android:background="?attr/colorOnPrimary"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/tv_tabName"
         app:layout_constraintTop_toTopOf="parent"
         app:tabGravity="start"
         app:tabIndicator="@null"

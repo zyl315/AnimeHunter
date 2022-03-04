@@ -1,5 +1,7 @@
 package com.zyl315.animehunter
 
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -13,5 +15,13 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
+    }
+
+    @Test
+    fun homePage() {
+        runBlocking {
+            val res = AgeFansDataSource().getPlaySource("20210169")
+            println(res)
+        }
     }
 }

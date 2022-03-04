@@ -3,6 +3,8 @@ package com.zyl315.animehunter
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSourceFactory
 import com.zyl315.exo.ExoMediaPlayerFactory
 import com.zyl315.player.player.VideoViewConfig
 import com.zyl315.player.player.VideoViewManager
@@ -20,6 +22,8 @@ class App : Application() {
                 .setLogEnabled(true)
                 .build()
         )
+
+        DataSourceManager.dataSourceFactory = AgeFansDataSourceFactory.create()
     }
 
     companion object {

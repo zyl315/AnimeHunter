@@ -5,22 +5,21 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
-import com.zyl315.animehunter.util.BackHandlerHelper
-import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.ui.adapter.onItemClickListener
 import com.zyl315.animehunter.ui.fragment.PlaySourceFragment
 import com.zyl315.animehunter.ui.widget.BangumiVideoController
+import com.zyl315.animehunter.util.BackHandlerHelper
+import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 import com.zyl315.player.player.AbstractPlayer
 import com.zyl315.player.player.ProgressManager
@@ -28,7 +27,7 @@ import com.zyl315.player.player.VideoView
 import com.zyl315.player.player.VideoViewManager
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
-    lateinit var viewModel: PlayViewModel
+    val viewModel: PlayViewModel by viewModels()
     private lateinit var mPlaySourceAdapter: PlaySourceAdapter
     private lateinit var playerView: VideoView<AbstractPlayer>
 
@@ -38,9 +37,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this).get(PlayViewModel::class.java)
-
         initData()
         initView()
         initListener()
@@ -65,9 +61,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 GridLayoutManager(this@PlayActivity, 1, GridLayoutManager.HORIZONTAL, false)
             rvPlayUrlList.adapter = mPlaySourceAdapter
             rvPlayUrlList.setHasFixedSize(true)
-
-            tvName.text = viewModel.bangumiBean.name
-            tvDescription.text = viewModel.bangumiBean.description
         }
     }
 
@@ -117,11 +110,13 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun initData() {
-        viewModel.bangumiBean = intent.getSerializableExtra(BANGUMI_BEAN) as BangumiBean
-        viewModel.getWatchHistory()
+        val id = intent.getStringExtra(BANGUMI_ID)!!
+        viewModel.getWatchHistory(id)
 
-        viewModel.playSourceState.observe(this) { state ->
+        viewModel.playDetailResultState.observe(this) { state ->
             state.success {
+                mBinding.tvName.text = viewModel.bangumiDetailBean.name
+                mBinding.tvDescription.text = viewModel.bangumiDetailBean.description
                 mBinding.tabPlaySource.apply {
                     removeAllTabs()
                     for (index in viewModel.playSourceList.indices) {
@@ -188,11 +183,12 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun openInBrowser() {
-        Snackbar.make(
+        val snackbar = Snackbar.make(
             mBinding.playerView,
             getString(R.string.unsupport_playback_links),
             Snackbar.LENGTH_LONG
-        ).setAction(getString(R.string.confirm)) {
+        )
+        snackbar.setAction(getString(R.string.confirm)) {
             val uri = Uri.parse(viewModel.currentEpisodeBean.let {
                 return@let (viewModel.getSourceHost() + it.href)
             })
@@ -204,7 +200,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             ) {
                 startActivity(intent)
             }
-        }.show()
+        }
+        snackbar.show()
     }
 
     override fun onPause() {
@@ -238,6 +235,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     companion object {
-        const val BANGUMI_BEAN = "BANGUMI_BEAN"
+        const val BANGUMI_ID = "BANGUMI_ID"
     }
 }
