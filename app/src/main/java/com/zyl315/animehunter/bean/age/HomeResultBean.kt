@@ -12,6 +12,7 @@ class HomeContentBean(
     val bangumiBeanList: MutableList<BangumiBean>
 ) : BaseBean
 
-class WeeklyPlayList(
+class WeeklyPlayListBean(
+    val weeklyPlayListMap:MutableMap<Int, MutableList<BangumiWeekListBean>>
 )
 

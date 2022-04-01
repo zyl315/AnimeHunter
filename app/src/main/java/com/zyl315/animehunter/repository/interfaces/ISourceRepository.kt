@@ -3,8 +3,8 @@ package com.zyl315.animehunter.repository.interfaces
 import android.webkit.WebView
 import com.zyl315.animehunter.bean.age.HomeResultBean
 import com.zyl315.animehunter.bean.age.PlayDetailResultBean
-import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
+import com.zyl315.animehunter.bean.age.WeeklyPlayListBean
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import java.lang.ref.WeakReference
 
@@ -56,10 +56,7 @@ interface IPlayParser {
 
 
 interface IHomeParser {
-    suspend fun getHomeContent():RequestState<HomeResultBean>
-//    suspend fun getDailyRecommendation(): RequestState<SearchResultBean>
-//
-//    suspend fun getLatestUpdate(): RequestState<SearchResultBean>
-//
-//    suspend fun getWeeklyPlayList(): RequestState<SearchResultBean>
+    suspend fun getHomeContent(): RequestState<HomeResultBean>
+
+    suspend fun getWeeklyPlayList(): RequestState<WeeklyPlayListBean>
 }

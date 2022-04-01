@@ -10,7 +10,10 @@ import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -280,6 +283,40 @@ class AgeFansDataSource : AbstractDataSource() {
         }
     }
 
+    override suspend fun getWeeklyPlayList(): RequestState<WeeklyPlayListBean> {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(BASE_URL)))
+                val bangumiScript =
+                    doc.select("#container div.div_right.baseblock  script")[0].html()
+                val res: Sequence<MatchResult> = Regex("\\{\"[^\\}]+\"\\}").findAll(bangumiScript)
+                val weeklyPlayMap: MutableMap<Int, MutableList<BangumiWeekListBean>> =
+                    mutableMapOf()
+                for (jsonStr in res) {
+                    val jsonObject = JSONObject(jsonStr.value)
+                    val bangumiWeekListBean = BangumiWeekListBean(
+                        jsonObject.getString("id"),
+                        jsonObject.getInt("wd"),
+                        jsonObject.getString("name"),
+                        jsonObject.getBoolean("isnew"),
+                        jsonObject.getString("mtime"),
+                        jsonObject.getString("namefornew")
+                    )
+
+                    weeklyPlayMap.let {
+                        if (!it.containsKey(bangumiWeekListBean.dayOfWeek)) {
+                            weeklyPlayMap[bangumiWeekListBean.dayOfWeek] = mutableListOf()
+                        }
+                        it[bangumiWeekListBean.dayOfWeek]!!.add(bangumiWeekListBean)
+                    }
+                }
+                return@withContext RequestState.Success(WeeklyPlayListBean(weeklyPlayMap))
+            }.getOrElse {
+                return@withContext RequestState.Error(it)
+            }
+        }
+    }
+
     private fun processBangumiHtml(doc: Element, page: Int = 1): SearchResultBean {
         if (page == 1) {
             mBangumiDetailList.clear()
@@ -356,6 +393,15 @@ class AgeFansDataSource : AbstractDataSource() {
                 url.startsWith("/") -> "$BASE_URL$url"
                 else -> "$BASE_URL/$url"
             }
+        }
+    }
+}
+
+fun main() {
+    runBlocking {
+        launch {
+            val res = AgeFansDataSource().getWeeklyPlayList()
+            print(res)
         }
     }
 }

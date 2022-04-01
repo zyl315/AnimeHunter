@@ -15,13 +15,13 @@ import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
-import com.zyl315.animehunter.ui.adapter.onItemClickListener
+import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
 import com.zyl315.animehunter.ui.fragment.PlaySourceFragment
 import com.zyl315.animehunter.ui.widget.BangumiVideoController
 import com.zyl315.animehunter.util.BackHandlerHelper
 import com.zyl315.animehunter.util.showToast
+import com.zyl315.animehunter.util.visible
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
-import com.zyl315.player.player.AbstractPlayer
 import com.zyl315.player.player.ProgressManager
 import com.zyl315.player.player.VideoView
 import com.zyl315.player.player.VideoViewManager
@@ -29,7 +29,6 @@ import com.zyl315.player.player.VideoViewManager
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     val viewModel: PlayViewModel by viewModels()
     private lateinit var mPlaySourceAdapter: PlaySourceAdapter
-    private lateinit var playerView: VideoView<AbstractPlayer>
 
     private lateinit var playerController: BangumiVideoController
 
@@ -37,26 +36,26 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initData()
+        viewModel.bangumiId = intent.getStringExtra(BANGUMI_ID)!!
+
         initView()
         initListener()
         initPlayer()
+        loadData()
     }
 
     private fun initView() {
-        mPlaySourceAdapter = PlaySourceAdapter(
-            viewModel.getEpisodeList(viewModel.playSourceIndex),
-            GridLayoutManager.HORIZONTAL,
-            viewModel.playEpisodeIndex,
-            object : onItemClickListener {
-                override fun onItemClick(position: Int) {
-                    viewModel.playSourceIndex = viewModel.selectSourceIndex
-                    viewModel.getPlayUrl(position)
-                }
-            })
+        mPlaySourceAdapter =
+            PlaySourceAdapter(GridLayoutManager.HORIZONTAL, viewModel.playEpisodeIndex)
+
+        mPlaySourceAdapter.onItemClickListener = object : OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                viewModel.playSourceIndex = viewModel.selectSourceIndex
+                viewModel.getPlayUrl(position)
+            }
+        }
 
         mBinding.run {
-            this@PlayActivity.playerView = playerView
             rvPlayUrlList.layoutManager =
                 GridLayoutManager(this@PlayActivity, 1, GridLayoutManager.HORIZONTAL, false)
             rvPlayUrlList.adapter = mPlaySourceAdapter
@@ -107,11 +106,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 }
             })
         }
-    }
-
-    private fun initData() {
-        val id = intent.getStringExtra(BANGUMI_ID)!!
-        viewModel.getWatchHistory(id)
 
         viewModel.playDetailResultState.observe(this) { state ->
             state.success {
@@ -126,13 +120,21 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                         )
                     }
                 }
+                mBinding.dduiEmptyView.hide()
+                mBinding.clDataArea.visible(true)
                 if (viewModel.continuePlay) {
                     viewModel.getPlayUrl(viewModel.playEpisodeIndex)
                 }
             }
 
             state.error {
-                showToast(resId = R.string.get_play_source_failed)
+                mBinding.dduiEmptyView.show(
+                    getString(R.string.get_play_source_failed),
+                    getString(R.string.retry_click)
+                ) {
+                    mBinding.dduiEmptyView.show(true)
+                    loadData()
+                }
             }
         }
 
@@ -155,16 +157,20 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 mBinding.rvPlayUrlList.scrollToPosition(viewModel.playEpisodeIndex)
                 mPlaySourceAdapter.setSelectPosition(viewModel.playEpisodeIndex)
             }
-            playerView.release()
+            mBinding.playerView.release()
         }
+    }
+
+    private fun loadData() {
+        viewModel.getPlaySource(viewModel.bangumiId)
     }
 
     private fun initPlayer() {
         VideoViewManager.instance().setPlayOnMobileNetwork(false)
         playerController = BangumiVideoController(this)
         playerController.setEnableInNormal(true)
-        playerView.setVideoController(playerController)
-        playerView.setProgressManager(object : ProgressManager() {
+        mBinding.playerView.setVideoController(playerController)
+        mBinding.playerView.setProgressManager(object : ProgressManager() {
             override fun saveProgress(url: String?, progress: Long, duration: Long) {
                 viewModel.saveWatchProgress(url, progress, duration)
             }
@@ -178,8 +184,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun starPlay(episodeBean: EpisodeBean) {
         playerController.setTitle(episodeBean.title)
-        playerView.setUrl(episodeBean.url)
-        playerView.start()
+        mBinding.playerView.setUrl(episodeBean.url)
+        mBinding.playerView.start()
     }
 
     private fun openInBrowser() {
@@ -207,20 +213,20 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     override fun onPause() {
         super.onPause()
         if (isFinishing) {
-            playerView.release()
+            mBinding.playerView.release()
         }
-        playerView.pause()
+        mBinding.playerView.pause()
     }
 
     override fun onResume() {
         super.onResume()
-        playerView.resume()
+        mBinding.playerView.resume()
     }
 
     override fun onStop() {
         super.onStop()
         if (isFinishing) {
-            playerView.release()
+            mBinding.playerView.release()
         }
     }
 
@@ -228,7 +234,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         if (BackHandlerHelper.handleBackPress(this)) {
             return
         }
-        if (playerView.onBackPressed()) {
+        if (mBinding.playerView.onBackPressed()) {
             return
         }
         super.onBackPressed()

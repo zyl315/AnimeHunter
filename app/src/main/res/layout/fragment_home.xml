@@ -24,18 +24,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/iv_history"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginHorizontal="16dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_history"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
         <TextView
             android:id="@+id/tv_search"
             android:layout_width="0dp"
@@ -47,10 +35,31 @@
             android:paddingHorizontal="8dp"
             app:drawableStartCompat="@drawable/ic_baseline_search_24"
             app:layout_constraintBottom_toBottomOf="parent"
-
-            app:layout_constraintEnd_toStartOf="@+id/iv_history"
+            app:layout_constraintEnd_toStartOf="@+id/iv_night_model_switch"
             app:layout_constraintStart_toEndOf="@+id/iv_catalog"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_night_model_switch"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_marginHorizontal="16dp"
+            android:src="@drawable/ic_day"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_history"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_history"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginHorizontal="16dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_history"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -78,6 +87,6 @@
         android:id="@+id/ddui_empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:ddui_show_loading="true"/>
+        app:ddui_show_loading="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

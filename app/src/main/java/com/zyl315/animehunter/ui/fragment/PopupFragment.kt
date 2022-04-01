@@ -38,15 +38,15 @@ abstract class PopupFragment<T : ViewBinding> :
     @SuppressLint("RtlHardcoded")
     private fun FragmentTransaction.setPopupGravityAnimations(gravity: Int) {
         when (gravity) {
-            Gravity.BOTTOM -> setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
-            Gravity.START, Gravity.LEFT -> setCustomAnimations(
-                android.R.anim.slide_in_left,
-                android.R.anim.slide_out_right
-            )
-            Gravity.END, Gravity.RIGHT -> setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_right
-            )
+            Gravity.BOTTOM -> {
+                setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+            }
+            Gravity.START, Gravity.LEFT -> {
+                setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            }
+            Gravity.END, Gravity.RIGHT -> {
+                setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right)
+            }
         }
     }
 }

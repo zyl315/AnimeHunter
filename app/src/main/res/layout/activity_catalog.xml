@@ -22,11 +22,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="?attr/colorOnPrimary"
+        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_bar"
-        app:srlEnableLoadMore="false"
-        app:srlEnableRefresh="false">
+        app:layout_constraintTop_toBottomOf="@id/title_bar">
 
         <com.scwang.smart.refresh.header.ClassicsHeader
             android:layout_width="match_parent"
@@ -51,7 +50,7 @@
                     android:id="@+id/rv_catalog"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:layout_scrollFlags="scroll|exitUntilCollapsed" />
+                    app:layout_scrollFlags="scroll|enterAlwaysCollapsed" />
             </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.recyclerview.widget.RecyclerView

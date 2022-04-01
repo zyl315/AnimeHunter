@@ -2,6 +2,8 @@ package com.zyl315.animehunter
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
+import kotlinx.coroutines.runBlocking
 
 import org.junit.Test
 import org.junit.runner.RunWith

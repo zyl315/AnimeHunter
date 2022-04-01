@@ -24,6 +24,8 @@ class App : Application() {
         )
 
         DataSourceManager.dataSourceFactory = AgeFansDataSourceFactory.create()
+
+//        DarkModeUtils.init(this)
     }
 
     companion object {

@@ -26,3 +26,12 @@ data class BangumiDetailBean(
     lateinit var newName: String
 }
 
+
+data class BangumiWeekListBean(
+    val bangumiID: String,
+    val dayOfWeek: Int,
+    val name: String,
+    val isNew: Boolean,
+    val updateTime: String,
+    val state: String
+) : BaseBean

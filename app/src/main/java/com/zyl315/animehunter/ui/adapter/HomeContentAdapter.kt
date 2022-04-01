@@ -27,7 +27,7 @@ class HomeContentAdapter(
         holder.apply {
             rvBangumi.layoutManager = GridLayoutManager(activity, spanCount)
             rvBangumi.setHasFixedSize(true)
-            rvBangumi.addItemDecoration(BangumiItemDecoration())
+//            rvBangumi.addItemDecoration(BangumiItemDecoration())
             bangumiAdapter = BangumiAdapter3(activity)
             rvBangumi.adapter = bangumiAdapter
         }

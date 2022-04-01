@@ -12,6 +12,6 @@
         android:gravity="center"
         android:maxLines="1"
         android:padding="8dp"
-        tools:text="第一集" />
+        tools:text="第1集" />
 
 </LinearLayout>

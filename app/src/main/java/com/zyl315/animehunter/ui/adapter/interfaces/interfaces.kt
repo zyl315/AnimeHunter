@@ -1,6 +1,6 @@
-package com.zyl315.animehunter.ui.adapter
+package com.zyl315.animehunter.ui.adapter.interfaces
 
-interface onItemClickListener {
+interface OnItemClickListener {
     fun onItemClick(position: Int)
 
     fun onItemLongClick(position: Int) {}

@@ -7,10 +7,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.databinding.FragmentPlaySourceBinding
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
-import com.zyl315.animehunter.ui.adapter.onItemClickListener
+import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 
 class PlaySourceFragment(override var popupGravity: Int) :
@@ -18,42 +17,41 @@ class PlaySourceFragment(override var popupGravity: Int) :
 
     var backgroundColorId: Int? = null
     var showCloseIcon: Boolean = true
-    private lateinit var viewModel: PlayViewModel
+    lateinit var viewModel: PlayViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)?.apply {
-            backgroundColorId?.let { setBackgroundResource(it) }
-        }
-
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+        backgroundColorId?.let { view?.setBackgroundResource(it) }
         viewModel = ViewModelProvider(requireActivity()).get(PlayViewModel::class.java)
 
         val currentPosition =
             if (viewModel.isCurrentPlaySource()) viewModel.playEpisodeIndex else -1
 
-        val mPlaySourceAdapter =
-            PlaySourceAdapter(
-                viewModel.getEpisodeList(viewModel.playSourceIndex),
-                LinearLayoutManager.VERTICAL,
-                currentPosition,
-                object : onItemClickListener {
-                    override fun onItemClick(position: Int) {
-                        viewModel.getPlayUrl(position)
-                        dismiss()
-                    }
-                },
-            )
+        val mPlaySourceAdapter = PlaySourceAdapter(
+            LinearLayoutManager.VERTICAL,
+            currentPosition,
+            viewModel.getEpisodeList(viewModel.selectSourceIndex)
+        )
+        mPlaySourceAdapter.onItemClickListener = object : OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                viewModel.playSourceIndex = viewModel.selectSourceIndex
+                viewModel.getPlayUrl(position)
+                dismiss()
+            }
+        }
 
         mBinding.run {
             rvPlayUrlList.layoutManager =
-                GridLayoutManager(requireActivity(), 3, RecyclerView.VERTICAL, false)
+                GridLayoutManager(requireActivity(), 3)
             rvPlayUrlList.adapter = mPlaySourceAdapter
             ivClose.visibility = if (showCloseIcon) View.VISIBLE else View.GONE
             ivClose.setOnClickListener { dismiss() }
         }
+
         return view
     }
 

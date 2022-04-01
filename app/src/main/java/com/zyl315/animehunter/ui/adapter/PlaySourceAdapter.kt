@@ -6,15 +6,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.bean.age.EpisodeBean
-import com.zyl315.animehunter.util.dp
 import com.zyl315.animehunter.ui.adapter.holder.PlaySourceViewHolder
+import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
+import com.zyl315.animehunter.util.dp
 
 class PlaySourceAdapter(
-    private var dataList: MutableList<EpisodeBean> = mutableListOf(),
     var orientation: Int,
     var currentPosition: Int,
-    var onItemClickListener: onItemClickListener,
+    private var dataList: MutableList<EpisodeBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
+    var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return PlaySourceViewHolder(
@@ -54,7 +55,7 @@ class PlaySourceAdapter(
 
             itemView.setOnClickListener {
                 setSelectPosition(position)
-                onItemClickListener.onItemClick(position)
+                onItemClickListener?.onItemClick(position)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.zyl315.animehunter.ui.fragment
 
+import DarkModeUtils
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,7 +21,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private var isInitialized = false
 
     val viewModel: HomeFragmentViewModel by viewModels()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +43,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             smartRefreshLayout.setOnRefreshListener {
                 loadData()
             }
+
+            ivNightModelSwitch.setImageResource(
+                if (DarkModeUtils.isDarkMode(requireContext())) {
+                    R.drawable.ic_night
+                } else {
+                    R.drawable.ic_day
+                }
+            )
         }
     }
 
@@ -56,6 +64,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 startActivity(Intent(requireContext(), HistoryActivity::class.java))
             }
 
+            ivNightModelSwitch.setOnClickListener {
+                if (DarkModeUtils.isDarkMode(requireContext())) {
+                    DarkModeUtils.applyDayMode(requireContext())
+                    ivNightModelSwitch.setImageResource(R.drawable.ic_day)
+                } else {
+                    DarkModeUtils.applyNightMode(requireContext())
+                    ivNightModelSwitch.setImageResource(R.drawable.ic_night)
+                }
+            }
+
             tvSearch.setOnClickListener {
                 startActivity(Intent(requireActivity(), SearchActivity::class.java))
             }
@@ -65,13 +83,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             state.success {
                 homeContentAdapter.submitList(it.data.contentList)
                 mBinding.smartRefreshLayout.finishRefresh(true)
-                if (!isInitialized) {
-                    isInitialized = true
-                    mBinding.dduiEmptyView.hide()
+                if (isInitialized) {
                     mBinding.smartRefreshLayout.setEnableRefresh(true)
                 } else {
                     mBinding.smartRefreshLayout.finishRefresh(true)
                 }
+                mBinding.dduiEmptyView.hide()
             }
 
             state.error {

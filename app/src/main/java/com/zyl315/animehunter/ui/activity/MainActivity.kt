@@ -7,6 +7,7 @@ import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivityMainBinding
 import com.zyl315.animehunter.ui.adapter.FragmentAdapter
 import com.zyl315.animehunter.ui.fragment.HomeFragment
+import com.zyl315.animehunter.ui.fragment.WeekPlayFragment
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     private lateinit var mFragmentAdapter: FragmentAdapter
@@ -15,7 +16,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         super.onCreate(savedInstanceState)
 
         val fragmentList = listOf<Fragment>(
-            HomeFragment.newInstance(), HomeFragment.newInstance(), HomeFragment.newInstance()
+            HomeFragment.newInstance(),
+            WeekPlayFragment.newInstance()
         )
         mFragmentAdapter = FragmentAdapter(this, fragmentList)
 
@@ -34,7 +36,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 when (item.itemId) {
                     R.id.menu_item_home -> viewPager2.currentItem = 0
                     R.id.menu_item_favor -> viewPager2.currentItem = 1
-                    R.id.menu_item_mine -> viewPager2.currentItem = 2
+                    R.id.menu_item_mine -> viewPager2.currentItem = 0
                 }
                 true
             }

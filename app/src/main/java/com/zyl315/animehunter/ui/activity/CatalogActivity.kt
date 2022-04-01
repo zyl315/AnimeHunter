@@ -62,7 +62,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             rvCatalog.adapter = catalogAdapter
             rvBangumi.layoutManager = GridLayoutManager(this@CatalogActivity, 3)
             rvBangumi.adapter = bangumiAdapter
-            rvBangumi.addItemDecoration(BangumiItemDecoration())
+//            rvBangumi.addItemDecoration(BangumiItemDecoration())
         }
     }
 
@@ -134,8 +134,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                     smartRefreshLayout.finishRefresh(true)
                     if (!isInitialized) {
                         isInitialized = true
-                        smartRefreshLayout.setEnableRefresh(true)
-                        smartRefreshLayout.setEnableLoadMore(true)
+                        smartRefreshLayout.visible(true)
                         emptyView.hide()
                     }
 
