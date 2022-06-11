@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.solver.GoalRow
 import androidx.core.view.isVisible
 import com.zyl315.animehunter.R
 import com.zyl315.player.controller.GestureVideoController
@@ -28,6 +29,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
     private lateinit var titleView: TitleView
     private lateinit var completeView: CompleteView
     private lateinit var bottomControlView: BottomControlView
+    private lateinit var bottomFullScreenControlView: BottomFullScreenControlView
     private lateinit var gestureView: GestureView
 
     private var mPlaySpeed = 1f
@@ -56,9 +58,11 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
         prepareView = PrepareView(context)
         titleView = TitleView(context)
         bottomControlView = BottomControlView(context)
+        bottomFullScreenControlView = BottomFullScreenControlView(context)
         gestureView = GestureView(context)
         addControlComponent(completeView, errorView, prepareView, titleView)
-        addControlComponent(bottomControlView, gestureView)
+        addControlComponent(bottomFullScreenControlView, bottomControlView)
+        addControlComponent(gestureView)
     }
 
     fun setTitle(title: String) {
@@ -97,6 +101,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
                 }
             }
         }
+        bottomControlViewChoose()
     }
 
     override fun onPlayerStateChanged(playerState: Int) {
@@ -109,12 +114,15 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
                 )
                 lockButton.visibility = GONE
             }
-            VideoView.PLAYER_FULL_SCREEN -> if (isShowing) {
-                lockButton.visibility = VISIBLE
-            } else {
-                lockButton.visibility = GONE
+            VideoView.PLAYER_FULL_SCREEN -> {
+                if (isShowing) {
+                    lockButton.visibility = VISIBLE
+                } else {
+                    lockButton.visibility = GONE
+                }
             }
         }
+
         if (mActivity != null && hasCutout()) {
             val orientation = mActivity!!.requestedOrientation
             val dp24 = PlayerUtils.dp2px(context, 24f)
@@ -130,6 +138,8 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
                 layoutParams.setMargins(dp24, 0, dp24, 0)
             }
         }
+
+        bottomControlViewChoose()
     }
 
     override fun onPlayStateChanged(playState: Int) {
@@ -174,7 +184,7 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
 
     override fun onLongPress(e: MotionEvent?) {
         super.onLongPress(e)
-        if (!mControlWrapper.isPlaying || bottomControlView.isShowEpisodes()) return
+        if (!mControlWrapper.isPlaying || bottomFullScreenControlView.isShowPopFragment()) return
 
         speedTip.visibility = VISIBLE
         mPlaySpeed = mControlWrapper.speed
@@ -184,8 +194,8 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
 
 
     override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-        if (bottomControlView.isShowEpisodes()) {
-            bottomControlView.hideEpisodes()
+        if (bottomFullScreenControlView.isShowPopFragment()) {
+            bottomFullScreenControlView.hidePopupFragment()
             return true
         }
         return super.onSingleTapConfirmed(e)
@@ -204,5 +214,15 @@ class BangumiVideoController : GestureVideoController, View.OnClickListener {
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun bottomControlViewChoose() {
+        if (mControlWrapper.isFullScreen) {
+            bottomControlView.visibility = GONE
+            bottomFullScreenControlView.visibility = VISIBLE
+        } else {
+            bottomControlView.visibility = VISIBLE
+            bottomFullScreenControlView.visibility = GONE
+        }
     }
 }

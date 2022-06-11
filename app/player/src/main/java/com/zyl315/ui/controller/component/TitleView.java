@@ -28,13 +28,14 @@ import androidx.annotation.Nullable;
 /**
  * 播放器顶部标题栏
  */
-public class TitleView extends FrameLayout implements IControlComponent {
+public class TitleView extends FrameLayout implements IControlComponent, View.OnClickListener {
 
     private ControlWrapper mControlWrapper;
 
     private LinearLayout mTitleContainer;
     private TextView mTitle;
     private TextView mSysTime;//系统当前时间
+    private ImageView mMoreImageView;
 
     private BatteryReceiver mBatteryReceiver;
     private boolean mIsRegister;//是否注册BatteryReceiver
@@ -56,18 +57,11 @@ public class TitleView extends FrameLayout implements IControlComponent {
         LayoutInflater.from(getContext()).inflate(R.layout.dkplayer_layout_title_view, this, true);
         mTitleContainer = findViewById(R.id.title_container);
         ImageView back = findViewById(R.id.back);
-        back.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Activity activity = PlayerUtils.scanForActivity(getContext());
-                if (activity != null && mControlWrapper.isFullScreen()) {
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    mControlWrapper.stopFullScreen();
-                }
-            }
-        });
+        back.setOnClickListener(this);
         mTitle = findViewById(R.id.title);
         mSysTime = findViewById(R.id.sys_time);
+        mMoreImageView = findViewById(R.id.iv_more);
+        mMoreImageView.setOnClickListener(this);
         //电量
         ImageView batteryLevel = findViewById(R.id.iv_battery);
         mBatteryReceiver = new BatteryReceiver(batteryLevel);
@@ -180,6 +174,20 @@ public class TitleView extends FrameLayout implements IControlComponent {
         } else {
             setVisibility(VISIBLE);
             mSysTime.setText(PlayerUtils.getCurrentSystemTime());
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.back) {
+            Activity activity = PlayerUtils.scanForActivity(getContext());
+            if (activity != null && mControlWrapper.isFullScreen()) {
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                mControlWrapper.stopFullScreen();
+            }
+        } else if (id == R.id.iv_more) {
+
         }
     }
 

@@ -1,10 +1,11 @@
 package com.zyl315.animehunter.ui.widget
 
-
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.opengl.Visibility
 import android.os.Build
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,17 +13,23 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
-import com.zyl315.animehunter.R
+import androidx.viewbinding.ViewBinding
 import com.zyl315.player.controller.ControlWrapper
 import com.zyl315.player.controller.IControlComponent
 import com.zyl315.player.player.VideoView
 import com.zyl315.player.util.PlayerUtils
 
+import com.zyl315.animehunter.R
+import com.zyl315.animehunter.ui.activity.PlayActivity
+import com.zyl315.animehunter.ui.fragment.PlaySourceFragment
+import com.zyl315.animehunter.ui.fragment.PlaySpeedFragment
+import com.zyl315.animehunter.ui.fragment.PopupFragment
+
 
 /**
  * 底部控制栏
  */
-class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
+class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClickListener,
     OnSeekBarChangeListener {
     private lateinit var mControlWrapper: ControlWrapper
     private var mTotalTime: TextView
@@ -32,8 +39,15 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
     private var mVideoProgress: SeekBar
     private var mBottomProgress: ProgressBar
     private var mPlayButton: ImageView
+    private var mSelections: TextView
+    private var mPlaySpeed: TextView
     private var mIsDragging = false
-    private var mIsShowBottomProgress = true
+    private var mIsShowBottomProgress = false
+
+    var currentPopupFragment: PopupFragment<out ViewBinding>? = null
+
+    lateinit var playSourceFragment: PlaySourceFragment
+    lateinit var playSpeedFragment: PlaySpeedFragment
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -44,7 +58,7 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
     )
 
     private val layoutId: Int
-        get() = R.layout.player_layout_bottom_control_view
+        get() = R.layout.player_layout_bottom_fullscreen_control_view
 
 
     /**
@@ -129,9 +143,11 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
         when (playerState) {
             VideoView.PLAYER_NORMAL -> {
                 mFullScreen.isSelected = false
+                mSelections.visibility = GONE
             }
             VideoView.PLAYER_FULL_SCREEN -> {
                 mFullScreen.isSelected = true
+                mSelections.visibility = VISIBLE
             }
         }
         val activity = PlayerUtils.scanForActivity(context)
@@ -194,6 +210,41 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
             R.id.iv_play -> {
                 mControlWrapper.togglePlay()
             }
+            R.id.selections -> {
+                mControlWrapper.hide()
+                if (!this::playSourceFragment.isInitialized) {
+                    playSourceFragment = PlaySourceFragment(Gravity.END).apply {
+                        backgroundColorId = R.color.black_70
+                        showCloseIcon = false
+                    }
+                }
+                val activity = PlayerUtils.scanForActivity(context)
+                if (activity is PlayActivity) {
+                    playSourceFragment.show(
+                        activity.supportFragmentManager,
+                        R.id.selections_container
+                    )
+                }
+                currentPopupFragment = playSourceFragment
+            }
+            R.id.tv_playSpeed -> {
+                mControlWrapper.hide()
+                if (!this::playSpeedFragment.isInitialized) {
+                    playSpeedFragment = PlaySpeedFragment(mControlWrapper.speed)
+                    playSpeedFragment.onClick = {
+                        mControlWrapper.speed = it
+                        mPlaySpeed.text = context.getString(R.string.play_speed).format(it)
+                    }
+                }
+                val activity = PlayerUtils.scanForActivity(context)
+                if (activity is PlayActivity) {
+                    playSpeedFragment.show(
+                        activity.supportFragmentManager,
+                        R.id.selections_container
+                    )
+                }
+                currentPopupFragment = playSpeedFragment
+            }
         }
     }
 
@@ -206,6 +257,15 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
         // 下面方法会根据适配宽高决定是否旋转屏幕
 //        mControlWrapper.toggleFullScreenByVideoSize(activity);
     }
+
+    fun isShowPopFragment(): Boolean {
+        return currentPopupFragment?.isShow ?: false
+    }
+
+    fun hidePopupFragment() {
+        currentPopupFragment?.dismiss()
+    }
+
 
     override fun onStartTrackingTouch(seekBar: SeekBar) {
         mIsDragging = true
@@ -244,6 +304,11 @@ class BottomControlView : FrameLayout, IControlComponent, View.OnClickListener,
         mPlayButton = findViewById(R.id.iv_play)
         mPlayButton.setOnClickListener(this)
         mBottomProgress = findViewById(R.id.bottom_progress)
+        mSelections = findViewById(R.id.selections)
+        mSelections.setOnClickListener(this)
+        mPlaySpeed = findViewById(R.id.tv_playSpeed)
+        mPlaySpeed.setOnClickListener(this)
+        mPlaySpeed.text = context.getString(R.string.play_speed).format(1.0)
 
         //5.1以下系统SeekBar高度需要设置成WRAP_CONTENT
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
