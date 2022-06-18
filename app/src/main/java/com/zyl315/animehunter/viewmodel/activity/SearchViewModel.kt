@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.bean.age.SearchResultBean
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
-import com.zyl315.animehunter.repository.impls.kudm.KudmDataSource
-import com.zyl315.animehunter.repository.impls.kudm.KudmDataSourceFactory
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 

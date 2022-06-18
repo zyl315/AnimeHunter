@@ -1,14 +1,7 @@
 package com.zyl315.animehunter.repository.impls.kudm
 
-import com.zyl315.animehunter.repository.datasource.DataSourceFactory
+import com.zyl315.animehunter.repository.datasource.AbstractDataSourceFactory
 
-class KudmDataSourceFactory : DataSourceFactory<KudmDataSource>() {
+class KudmDataSourceFactory : AbstractDataSourceFactory<KudmDataSource>() {
     override fun createDataSource(): KudmDataSource = KudmDataSource()
-
-    companion object {
-        fun create(): KudmDataSourceFactory {
-            return KudmDataSourceFactory()
-        }
-    }
-
 }

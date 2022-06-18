@@ -1,13 +1,16 @@
-package com.zyl315.animehunter.repository.impls.kudm
+package com.zyl315.animehunter.repository.impls.ysjdm
 
-import android.text.Html
 import android.webkit.WebView
 import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.*
+import com.zyl315.animehunter.execption.IPCheckException
+import com.zyl315.animehunter.execption.MaxRetryException
+import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
-import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
+import com.zyl315.animehunter.repository.impls.kudm.KudmDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import com.zyl315.animehunter.util.URLCodeUtil
@@ -15,14 +18,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.lang.ref.WeakReference
-import java.net.URLEncoder
+import java.net.URLDecoder
 
-class KudmDataSource : AbstractDataSource() {
+class YsjdmDataSource : AbstractDataSource() {
     private val mBangumiCoverBeanList: MutableList<BangumiCoverBean> = mutableListOf()
 
-    override fun getHost(): String = BASE_URL
+    override fun getHost(): String {
+        return BASE_URL
+    }
 
     override fun getDefaultCatalogUrl(): String {
         TODO("Not yet implemented")
@@ -34,27 +41,22 @@ class KudmDataSource : AbstractDataSource() {
 
     override suspend fun getSearchData(keyword: String, page: Int): RequestState<SearchResultBean> {
         if (page == 1) mBangumiCoverBeanList.clear()
-        val searWord = URLEncoder.encode(keyword, "GBK")
-        val searchUrl = packUrl("/search.asp?page=$page&searchword=$searWord&searchtype=-1")
+        val url = packUrl("/index.php/vod/search.html?wd=${keyword}&page=${page}")
         return withContext(Dispatchers.IO) {
             runCatching {
-                val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(searchUrl), isGBK = true))
+                val doc = Jsoup.parse(MyOkHttpClient.getDoc(url))
+                val totalCount = matchDigital(doc.select(".foot.foot_nav").prev().html())
 
-                val totalInfo = Regex("\\u5171 \\d+ \\u6761").find(doc.select("div.box700.fl h3.titbar")[0].text())
-
-                val totalCount = Regex("\\d+").find(totalInfo!!.value)!!.value.toInt()
-
-                doc.select("div.movie-chrList ul li").forEach {
-                    val bangumiId = it.child(0).child(0).attr("href")
-                    val coverUrl = packUrl(it.select("img")[0].attr("src"))
-                    val title = it.select("img")[0].attr("alt")
-                    val status = it.select("em")[0].text()
-                    val type = it.select("em")[1].text().replace("主演", "类型")
-                    val lastUpdateTime = it.select("em")[2].text()
-
+                doc.select("li.searchlist_item").forEach {
+                    val bangumiId = matchDigital(it.child(0).child(0).attr("href")).toString()
+                    val coverUrl = packUrl(it.child(0).child(0).attr("data-original"))
+                    val title = it.child(0).child(0).attr("title")
+                    val status = it.select("span.pic_text.text_right").text()
+                    val type = it.select("p.vodlist_sub")[0].text()
+                    val lastUpdateTime = it.select("p.vodlist_sub")[1].text()
                     mBangumiCoverBeanList.add(
                         BangumiCoverBean(
-                            DataSource.KUDM, bangumiId, title, coverUrl, type, status, lastUpdateTime
+                            DataSourceManager.DataSource.YSJDM, bangumiId, title, coverUrl, type, status, lastUpdateTime
                         )
                     )
                 }
@@ -71,7 +73,6 @@ class KudmDataSource : AbstractDataSource() {
 
     override suspend fun getBangumi(url: String, page: Int): RequestState<SearchResultBean> {
         TODO("Not yet implemented")
-        Html.fromHtml("")
     }
 
     override suspend fun getMoreBangumi(url: String, page: Int): RequestState<SearchResultBean> {
@@ -89,32 +90,28 @@ class KudmDataSource : AbstractDataSource() {
     }
 
     override suspend fun getPlaySource(bangumiId: String): RequestState<PlayDetailResultBean> {
-        val url = packUrl("${bangumiId}/v.html")
+        val url = KudmDataSource.packUrl("/index.php/vod/detail?id=$bangumiId")
         return withContext(Dispatchers.IO) {
             runCatching {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(url))
-                val sourceUrl = packUrl(doc.select("div#ccplay")[0].child(0).attr("src"))
-                val videListJson = MyOkHttpClient.getDoc(sourceUrl)
-                val res: Sequence<MatchResult> = Regex("'[^,]*'").findAll(videListJson)
                 val playSourceBean = PlaySourceBean(0, true)
-                res.forEach {
-                    val str = it.value.replace("'", "")
-                    val arr = str.split("$")
-                    if (arr.size == 3) {
-                        val title = arr[0].replace("\\u", "%u")
-                        playSourceBean.episodeList.add(
-                            EpisodeBean(URLCodeUtil.decode(title), arr[1], arr[1])
-                        )
-                        playSourceBean.count += 1
-                    }
+                doc.select("div.playlist_full ul.content_playlist li").forEach {
+                    val title = it.select("a").text()
+                    val href = it.select("a").attr("href")
+                    playSourceBean.episodeList.add(EpisodeBean(title, href))
                 }
+
+                val desc = doc.select("div.content_desc.context span").text()
 
                 val playSourceList: MutableList<PlaySourceBean> = mutableListOf()
                 playSourceList.add(playSourceBean)
 
+                val bangumiDetailBean = BangumiDetailBean(bangumiId).apply {
+                    description = desc
+                }
                 return@withContext RequestState.Success(
                     PlayDetailResultBean(
-                        playSourceList, BangumiDetailBean(bangumiId)
+                        playSourceList, bangumiDetailBean
                     )
                 )
             }.getOrElse {
@@ -124,7 +121,18 @@ class KudmDataSource : AbstractDataSource() {
     }
 
     override suspend fun getPlayUrl(url: String, retryCount: Int): RequestState<String> {
-        return RequestState.Success("")
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(url)))
+                val jsonStr = Regex("\\{.*\\}").find(doc.select("div.play_box script")[0].html())!!.value
+                val playJson = JSONObject(jsonStr)
+                val playUrl = playJson.getString("url")
+                return@withContext RequestState.Success(playUrl)
+            }.getOrElse {
+                it.printStackTrace()
+                return@withContext RequestState.Error(it)
+            }
+        }
     }
 
     override fun getCatalogUrl(url: String): String {
@@ -139,9 +147,8 @@ class KudmDataSource : AbstractDataSource() {
         TODO("Not yet implemented")
     }
 
-
     companion object {
-        var BASE_URL = "https://www.sbdm.net"
+        var BASE_URL = "https://www.ysjdm.net"
 
         fun packUrl(url: String): String {
             return when {
@@ -151,13 +158,18 @@ class KudmDataSource : AbstractDataSource() {
                 else -> "$BASE_URL/$url"
             }
         }
+
+        fun matchDigital(text: String): Int {
+            return Regex("\\d+").find(text)!!.value.toInt()
+        }
+
     }
 }
 
 fun main() {
     runBlocking {
         launch {
-            val res = KudmDataSource().getPlaySource("LADM/38756")
+            val res = YsjdmDataSource().getPlaySource("1657")
             print(res)
         }
     }

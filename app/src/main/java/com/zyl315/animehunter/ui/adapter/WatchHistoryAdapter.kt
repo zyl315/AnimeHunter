@@ -48,6 +48,7 @@ class WatchHistoryAdapter(
             tvEpisodeTitle.text = item.episodeName
             tvDuration.text = translateWatchPosition(item.watchedPosition, item.duration)
             tvLastWatchTime.text = translateTimeUnit(item.time)
+            tvDataSource.text = item.bangumiCoverBean.dataSource.toString()
             rbSelect.apply {
                 if (isSelectModel) {
                     visibility = View.VISIBLE

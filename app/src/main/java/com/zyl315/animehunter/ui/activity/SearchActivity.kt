@@ -136,7 +136,9 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
             .setOnSheetItemClickListener { dialog, itemView, position, tag ->
                 dataSourceMap[tag]?.let {
                     viewModel.setDataSource(it)
-                    search(viewModel.searchWord)
+                    if (viewModel.searchWord.isNotBlank()) {
+                        search(viewModel.searchWord)
+                    }
                 }
                 dialog?.dismiss()
             }

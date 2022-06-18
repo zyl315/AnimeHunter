@@ -1,14 +1,8 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
-import com.zyl315.animehunter.repository.datasource.DataSourceFactory
+import com.zyl315.animehunter.repository.datasource.AbstractDataSourceFactory
 
-class AgeFansDataSourceFactory : DataSourceFactory<AgeFansDataSource>() {
+class AgeFansDataSourceFactory : AbstractDataSourceFactory<AgeFansDataSource>() {
 
     override fun createDataSource(): AgeFansDataSource = AgeFansDataSource()
-
-    companion object {
-        fun create(): AgeFansDataSourceFactory {
-            return AgeFansDataSourceFactory()
-        }
-    }
 }
