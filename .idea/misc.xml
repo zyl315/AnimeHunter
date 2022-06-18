@@ -4,15 +4,35 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_more.xml" value="0.179" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_progress_loading.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_seekbar_thumb.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_seekbar_thumb_normal.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_selector_full_screen_button.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_selector_lock_button.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_shape_back_bg.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_shape_play_bg.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_shape_standard_controller_top_bg.xml" value="0.2155" />
+        <entry key="..\:/Android/project/app/player/src/main/res/drawable/dkplayer_shape_stardard_controller_bottom_bg.xml" value="0.2155" />
         <entry key="..\:/Android/project/app/player/src/main/res/layout/dkplayer_layout_error_view.xml" value="0.35520833333333335" />
         <entry key="..\:/Android/project/app/player/src/main/res/layout/dkplayer_layout_title_view.xml" value="0.3333333333333333" />
+        <entry key="..\:/Android/project/app/src/main/res/drawable-v24/shape_circle_color.xml" value="0.2155" />
         <entry key="..\:/Android/project/app/src/main/res/layout/activity_play.xml" value="0.3875" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/activity_search.xml" value="0.3333333333333333" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/fragment_bangumi_detail.xml" value="0.2391304347826087" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/fragment_bottom_sheet_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/fragment_container.xml" value="0.2391304347826087" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/fragment_home.xml" value="0.17274569402228976" />
         <entry key="..\:/Android/project/app/src/main/res/layout/fragment_play_source.xml" value="0.2391304347826087" />
         <entry key="..\:/Android/project/app/src/main/res/layout/fragment_play_speed.xml" value="0.3333333333333333" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/fragment_week_play.xml" value="0.2391304347826087" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/item_bangumi_cover_1.xml" value="0.2391304347826087" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/item_bangumi_cover_2.xml" value="0.5" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/item_bangumi_cover_3.xml" value="0.2391304347826087" />
         <entry key="..\:/Android/project/app/src/main/res/layout/item_play_speed.xml" value="0.22" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/item_week_bangumi.xml" value="0.2391304347826087" />
         <entry key="..\:/Android/project/app/src/main/res/layout/player_layout_bangumi_controller.xml" value="0.35520833333333335" />
         <entry key="..\:/Android/project/app/src/main/res/layout/player_layout_bottom_control_view.xml" value="0.3333333333333333" />
-        <entry key="..\:/Android/project/app/src/main/res/layout/player_layout_bottom_fullscreen_control_view.xml" value="0.4466666666666667" />
+        <entry key="..\:/Android/project/app/src/main/res/layout/player_layout_bottom_fullscreen_control_view.xml" value="0.22" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/drawable-v24/shape_circle_color.xml" value="0.23981481481481481" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/drawable-v24/shape_rectangle_unselect.xml" value="0.264" />
         <entry key="..\:/AndroidProject/kotlin/AnimeHunter/app/src/main/res/drawable/ic_back_to_top.xml" value="0.362962962962963" />

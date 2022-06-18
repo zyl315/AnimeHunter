@@ -1,4 +1,4 @@
-package com.zyl315.animehunter.ui.fragment
+package com.zyl315.animehunter.ui.fragment.player
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,31 +10,27 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.zyl315.animehunter.databinding.FragmentPlaySourceBinding
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
+import com.zyl315.animehunter.ui.fragment.PopupFragment
 import com.zyl315.animehunter.viewmodel.activity.PlayViewModel
 
-class PlaySourceFragment(override var popupGravity: Int) :
-    PopupFragment<FragmentPlaySourceBinding>() {
+
+class PlaySourceFragment(override var popupGravity: Int) : PopupFragment<FragmentPlaySourceBinding>() {
 
     var backgroundColorId: Int? = null
     var showCloseIcon: Boolean = true
     lateinit var viewModel: PlayViewModel
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         backgroundColorId?.let { view?.setBackgroundResource(it) }
         viewModel = ViewModelProvider(requireActivity()).get(PlayViewModel::class.java)
 
-        val currentPosition =
-            if (viewModel.isCurrentPlaySource()) viewModel.playEpisodeIndex else -1
+        val currentPosition = if (viewModel.isCurrentPlaySource()) viewModel.playEpisodeIndex else -1
 
         val mPlaySourceAdapter = PlaySourceAdapter(
-            LinearLayoutManager.VERTICAL,
-            currentPosition,
-            viewModel.getEpisodeList(viewModel.selectSourceIndex)
+            LinearLayoutManager.VERTICAL, currentPosition, viewModel.getEpisodeList(viewModel.selectSourceIndex)
         )
         mPlaySourceAdapter.onItemClickListener = object : OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -45,8 +41,7 @@ class PlaySourceFragment(override var popupGravity: Int) :
         }
 
         mBinding.run {
-            rvPlayUrlList.layoutManager =
-                GridLayoutManager(requireActivity(), 3)
+            rvPlayUrlList.layoutManager = GridLayoutManager(requireActivity(), 3)
             rvPlayUrlList.adapter = mPlaySourceAdapter
             ivClose.visibility = if (showCloseIcon) View.VISIBLE else View.GONE
             ivClose.setOnClickListener { dismiss() }
@@ -60,9 +55,7 @@ class PlaySourceFragment(override var popupGravity: Int) :
         return true
     }
 
-
     override fun getBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?
+        inflater: LayoutInflater, container: ViewGroup?
     ): FragmentPlaySourceBinding = FragmentPlaySourceBinding.inflate(inflater, container, false)
 }

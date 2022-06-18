@@ -11,23 +11,9 @@
         android:id="@+id/iv_cover"
         android:layout_width="130dp"
         android:layout_height="160dp"
+        android:paddingHorizontal="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="130dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/shape_circle_color"
-        android:gravity="end"
-        android:maxLines="1"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="3dp"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@id/iv_cover"
-        app:layout_constraintEnd_toEndOf="@+id/iv_cover"
-        tools:text="23:00 第七集" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
@@ -38,59 +24,49 @@
 
 
         <TextView
-            android:id="@+id/tv_name"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="2"
             android:paddingHorizontal="8dp"
             android:textSize="17sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_bangumiType"
+            app:layout_constraintBottom_toTopOf="@+id/tv_type"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="平家物语" />
 
         <TextView
-            android:id="@+id/tv_bangumiType"
+            android:id="@+id/tv_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
-            app:layout_constraintBottom_toTopOf="@id/tv_premiereTime"
+            app:layout_constraintBottom_toTopOf="@id/tv_lastUpdateTime"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
             tools:text="动画种类：TV" />
 
         <TextView
-            android:id="@+id/tv_premiereTime"
+            android:id="@+id/tv_lastUpdateTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
-            app:layout_constraintBottom_toTopOf="@id/tv_playStatus"
+            app:layout_constraintBottom_toTopOf="@id/tv_status"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_bangumiType"
-            tools:text="首播时间：2020-01" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_type"
+            tools:text="更新时间：2020-01" />
 
 
         <TextView
-            android:id="@+id/tv_playStatus"
+            android:id="@+id/tv_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            app:layout_constraintBottom_toTopOf="@id/tv_plotType"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_premiereTime"
-            tools:text="播放状态：连载" />
-
-        <TextView
-            android:id="@+id/tv_plotType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
             android:paddingHorizontal="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_playStatus"
-            tools:text="剧情类型：历史" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_lastUpdateTime"
+            tools:text="播放状态：连载" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

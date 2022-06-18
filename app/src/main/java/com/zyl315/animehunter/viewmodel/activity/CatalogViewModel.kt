@@ -3,7 +3,7 @@ package com.zyl315.animehunter.viewmodel.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zyl315.animehunter.bean.age.BangumiDetailBean
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.CatalogTagBean
 import com.zyl315.animehunter.bean.age.SearchResultBean
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
@@ -18,7 +18,7 @@ class CatalogViewModel : ViewModel() {
     var catalogList: MutableLiveData<List<CatalogTagBean>> = MutableLiveData()
     var refreshCatalogList: List<CatalogTagBean> = mutableListOf()
 
-    var mBangumiDetailList: MutableLiveData<List<BangumiDetailBean>> = MutableLiveData()
+    var mBangumiCoverList: MutableLiveData<List<BangumiCoverBean>> = MutableLiveData()
 
     var nextPage = 1
 

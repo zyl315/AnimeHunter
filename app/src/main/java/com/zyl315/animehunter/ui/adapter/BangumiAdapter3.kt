@@ -6,19 +6,19 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
-import com.zyl315.animehunter.bean.age.BangumiBean
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.ui.activity.PlayActivity
-import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_ID
+import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_COVER
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover2ViewHolder
 import com.zyl315.animehunter.util.dp
-import com.zyl315.animehunter.util.gone
 
 class BangumiAdapter3(
     private val activity: Activity,
-    private val dataList: MutableList<BangumiBean> = mutableListOf()
+    private val dataList: MutableList<BangumiCoverBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
 
 
@@ -30,16 +30,15 @@ class BangumiAdapter3(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = dataList[position]
+        val bangumiCoverBean = dataList[position]
         if (holder is BangumiCover2ViewHolder) {
             holder.apply {
                 Glide.with(activity)
-                    .load(item.coverUrl)
-                    .apply(RequestOptions().transform(RoundedCorners(5.dp)))
+                    .load(bangumiCoverBean.coverUrl)
+                    .apply(RequestOptions().transform(CenterCrop(), RoundedCorners(5.dp)))
                     .into(ivCover)
-                tvNewName.text = item.newName
-                if (item.newName.isBlank()) tvNewName.gone()
-                tvName.text = item.name
+                tvStatus.text = bangumiCoverBean.status
+                tvTitle.text = bangumiCoverBean.title
             }
 
             holder.itemView.setOnClickListener {
@@ -49,7 +48,7 @@ class BangumiAdapter3(
     }
 
 
-    fun submitList(newList: List<BangumiBean>) {
+    fun submitList(newList: List<BangumiCoverBean>) {
         dataList.clear()
         dataList.addAll(newList)
         notifyDataSetChanged()
@@ -61,7 +60,7 @@ class BangumiAdapter3(
                 activity,
                 PlayActivity::class.java
             ).apply {
-                putExtra(BANGUMI_ID, dataList[position].bangumiID)
+                putExtra(BANGUMI_COVER, dataList[position])
             })
     }
 }

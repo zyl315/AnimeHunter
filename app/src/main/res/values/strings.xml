@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AnimeHunter</string>
+    <!--    <string name="app_name" translatable="false">AnimeHunter</string>-->
     <string name="action_settings">Settings</string>
 
     <string name="cancel">取消</string>
@@ -36,7 +36,8 @@
     <string name="empty">空空无也</string>
     <string name="loaded_failed">加载失败</string>
     <string name="retry_click">点击重试</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="play_speed">"%sX"</string>
+    <string name="play_source">播放源%s</string>
+    <string name="unkonwn_error">未知错误</string>
+    <string name="switch_search_data_sources">切换搜索数据源</string>
 </resources>

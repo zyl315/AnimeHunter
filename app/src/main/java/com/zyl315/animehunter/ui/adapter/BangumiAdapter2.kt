@@ -7,12 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.ui.activity.PlayActivity
-import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_ID
+import com.zyl315.animehunter.ui.activity.PlayActivity.Companion.BANGUMI_COVER
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover1ViewHolder
 import com.zyl315.animehunter.ui.adapter.holder.BangumiCover2ViewHolder
 import com.zyl315.animehunter.ui.adapter.holder.EmptyViewHolder
@@ -23,7 +25,7 @@ import com.zyl315.animehunter.util.gone
 class BangumiAdapter2(
     private val activity: Activity,
     private val coverType: Int,
-    private val dataList: MutableList<BangumiDetailBean> = mutableListOf()
+    private val dataList: MutableList<BangumiCoverBean> = mutableListOf()
 ) : BaseRvAdapter(dataList) {
 
 
@@ -32,7 +34,7 @@ class BangumiAdapter2(
             ViewHolderType.BANGUMI_COVER_1 ->
                 BangumiCover1ViewHolder(
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_bangumi_cover_1, parent, false)
+                        .inflate(R.layout.item_bangumi_cover_3, parent, false)
                 )
 
             ViewHolderType.BANGUMI_COVER_2 -> {
@@ -48,22 +50,19 @@ class BangumiAdapter2(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = dataList[position]
+        val bangumiCoverBean = dataList[position]
         when (holder) {
             is BangumiCover1ViewHolder -> {
                 holder.apply {
                     Glide.with(activity)
-                        .load(item.coverUrl)
+                        .load(bangumiCoverBean.coverUrl)
                         .apply(RequestOptions().transform(RoundedCorners(5.dp)))
                         .into(ivCover)
-                    tvNewName.text = item.newName
-                    if (item.newName.isBlank()) tvNewName.gone()
-
-                    tvName.text = item.name
-                    tvBangumiType.text = item.bangumiType.run { "动画种类：$this" }
-                    tvPremiereTime.text = item.premiereTime.run { "首播时间：$this" }
-                    tvPlayStatus.text = item.playStatus.run { "播放状态：$this" }
-                    tvPlotType.text = item.plotType.run { "剧情类型：$this" }
+                    tvStatus.text = bangumiCoverBean.status
+                    tvLastUpdateTime.text = bangumiCoverBean.lastUpdateTime
+                    tvTitle.text = bangumiCoverBean.title
+                    tvType.text = bangumiCoverBean.type
+                    tvStatus.text = bangumiCoverBean.status
                 }
 
                 holder.itemView.setOnClickListener {
@@ -74,12 +73,11 @@ class BangumiAdapter2(
             is BangumiCover2ViewHolder -> {
                 holder.apply {
                     Glide.with(activity)
-                        .load(item.coverUrl)
-                        .apply(RequestOptions().transform(RoundedCorners(5.dp)))
+                        .load(bangumiCoverBean.coverUrl)
+                        .apply(RequestOptions().transform(CenterCrop(), RoundedCorners(5.dp)))
                         .into(ivCover)
-                    tvNewName.text = item.newName
-                    if (item.newName.isBlank()) tvNewName.gone()
-                    tvName.text = item.name
+                    tvStatus.text = bangumiCoverBean.status
+                    tvTitle.text = bangumiCoverBean.title
                 }
 
                 holder.itemView.setOnClickListener {
@@ -93,7 +91,7 @@ class BangumiAdapter2(
         return coverType
     }
 
-    fun submitList(newList: List<BangumiDetailBean>) {
+    fun submitList(newList: List<BangumiCoverBean>) {
         dataList.clear()
         dataList.addAll(newList)
         notifyDataSetChanged()
@@ -105,7 +103,7 @@ class BangumiAdapter2(
                 activity,
                 PlayActivity::class.java
             ).apply {
-                putExtra(BANGUMI_ID, dataList[position].bangumiID)
+                putExtra(BANGUMI_COVER, dataList[position])
             })
     }
 }

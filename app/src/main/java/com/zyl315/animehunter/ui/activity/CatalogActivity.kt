@@ -13,7 +13,6 @@ import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.adapter.BangumiAdapter2
 import com.zyl315.animehunter.ui.adapter.CatalogAdapter
 import com.zyl315.animehunter.ui.adapter.EmptyAdapter
-import com.zyl315.animehunter.ui.adapter.decoration.BangumiItemDecoration
 import com.zyl315.animehunter.ui.adapter.holder.ViewHolderType
 import com.zyl315.animehunter.util.gone
 import com.zyl315.animehunter.util.showToast
@@ -49,7 +48,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
         }
 
         bangumiAdapter = BangumiAdapter2(this, ViewHolderType.BANGUMI_COVER_2)
-        viewModel.mBangumiDetailList.observe(this) { list -> bangumiAdapter.submitList(list) }
+        viewModel.mBangumiCoverList.observe(this) { list -> bangumiAdapter.submitList(list) }
 
         emptyAdapter = EmptyAdapter()
 
@@ -138,14 +137,14 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                         emptyView.hide()
                     }
 
-                    if (it.data.bangumiDetailList.isEmpty()) {
+                    if (it.data.bangumiCoverList.isEmpty()) {
                         rvBangumi.adapter = emptyAdapter
                         (rvBangumi.layoutManager as GridLayoutManager).spanCount = 1
                         smartRefreshLayout.setEnableLoadMore(false)
                     } else {
                         rvBangumi.adapter = bangumiAdapter
                         (rvBangumi.layoutManager as GridLayoutManager).spanCount = 3
-                        bangumiAdapter.submitList(it.data.bangumiDetailList.toList())
+                        bangumiAdapter.submitList(it.data.bangumiCoverList.toList())
                         smartRefreshLayout.setEnableLoadMore(true)
                     }
                 }
@@ -170,7 +169,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
 
         viewModel.bangumiState.observe(this) { state ->
             state.success {
-                bangumiAdapter.submitList(it.data.bangumiDetailList.toList())
+                bangumiAdapter.submitList(it.data.bangumiCoverList.toList())
                 mBinding.apply {
                     smartRefreshLayout.setNoMoreData(it.data.isLastPage)
                     smartRefreshLayout.finishLoadMore(true)

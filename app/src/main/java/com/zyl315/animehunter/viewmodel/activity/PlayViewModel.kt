@@ -3,11 +3,13 @@ package com.zyl315.animehunter.viewmodel.activity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.BangumiDetailBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.bean.age.PlayDetailResultBean
 import com.zyl315.animehunter.bean.age.PlaySourceBean
 import com.zyl315.animehunter.database.enity.WatchHistory
+import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.impls.HistoryRepository
 import com.zyl315.animehunter.repository.interfaces.IHistoryRepository
@@ -16,9 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlayViewModel : ViewModel() {
-    private val historyRepository: IHistoryRepository = HistoryRepository()
-    private val dataSource = DataSourceManager.getDataSource()
-
     var playSourceList: List<PlaySourceBean> = mutableListOf()
 
     var playSourceIndex = 0
@@ -33,10 +32,15 @@ class PlayViewModel : ViewModel() {
         MutableLiveData()
     val playUrlState: MutableLiveData<RequestState<String>> = MutableLiveData()
 
-    lateinit var bangumiId: String
+    lateinit var bangumiCoverBean: BangumiCoverBean
     lateinit var bangumiDetailBean: BangumiDetailBean
     lateinit var currentEpisodeBean: EpisodeBean
     lateinit var watchHistory: WatchHistory
+
+    private val historyRepository: IHistoryRepository = HistoryRepository()
+    private val dataSource: AbstractDataSource by lazy {
+        DataSourceManager.getDataSource(bangumiCoverBean.dataSource)
+    }
 
 
     fun getPlaySource(bangumiId: String) {
@@ -70,6 +74,8 @@ class PlayViewModel : ViewModel() {
                         currentEpisodeBean.url = it.data
                     }
                 }
+            } else {
+                result = RequestState.Success(currentEpisodeBean.url)
             }
             playUrlState.postValue(result)
         }
@@ -126,7 +132,7 @@ class PlayViewModel : ViewModel() {
                         playEpisodeIndex,
                         duration,
                         currentPosition,
-                        bangumiDetailBean
+                        bangumiCoverBean
                     )
                 )
             }

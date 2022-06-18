@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.BangumiWeekListBean
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
 import com.zyl315.animehunter.ui.activity.PlayActivity
 
 class WeekBangumiAdapter(
@@ -27,12 +30,22 @@ class WeekBangumiAdapter(
         if (holder is WeekBangumiViewHolder) {
             holder.tvName.text = bangumi.name
             holder.itemView.setOnClickListener {
+                val bangumiCoverBean = BangumiCoverBean(
+                    DataSource.AGEFANS,
+                    bangumi.bangumiID,
+                    bangumi.name,
+                    "",
+                    "",
+                    bangumi.status,
+                    bangumi.updateTime
+                )
+
                 activity.startActivity(
                     Intent(
                         activity,
                         PlayActivity::class.java
                     ).apply {
-                        putExtra(PlayActivity.BANGUMI_ID, dataList[position].bangumiID)
+                        putExtra(PlayActivity.BANGUMI_COVER, bangumiCoverBean)
                     })
             }
         }
@@ -47,6 +60,6 @@ class WeekBangumiAdapter(
     }
 
     inner class WeekBangumiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvName: TextView = itemView.findViewById(R.id.tv_name)
+        val tvName: TextView = itemView.findViewById(R.id.tv_title)
     }
 }

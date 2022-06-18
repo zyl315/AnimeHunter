@@ -1,4 +1,4 @@
-package com.zyl315.animehunter.ui.fragment
+package com.zyl315.animehunter.ui.fragment.player
 
 import android.os.Bundle
 import android.view.Gravity
@@ -10,18 +10,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.FragmentPlaySpeedBinding
-import com.zyl315.animehunter.repository.interfaces.RequestState
+import com.zyl315.animehunter.ui.fragment.PopupFragment
 
-class PlaySpeedFragment(var currentSpeed: Float) : PopupFragment<FragmentPlaySpeedBinding>() {
+class PlaySpeedFragment : PopupFragment<FragmentPlaySpeedBinding>() {
+    var currentSpeed: Float = 0.1f
 
     private val speedList: MutableList<Float> = mutableListOf(0.5f, 0.75f, 1.0f, 2.0f, 3.0f)
     var onClick: ((Float) -> Unit)? = null
     override var popupGravity: Int = Gravity.END
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         view?.setBackgroundResource(R.color.black_70)
@@ -34,8 +33,7 @@ class PlaySpeedFragment(var currentSpeed: Float) : PopupFragment<FragmentPlaySpe
     }
 
     override fun getBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?
+        inflater: LayoutInflater, container: ViewGroup?
     ): FragmentPlaySpeedBinding {
         return FragmentPlaySpeedBinding.inflate(inflater, container, false)
     }
@@ -49,17 +47,16 @@ class PlaySpeedFragment(var currentSpeed: Float) : PopupFragment<FragmentPlaySpe
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             return PlaySpeedViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_play_speed, parent, false)
+                LayoutInflater.from(parent.context).inflate(R.layout.item_play_speed, parent, false)
             )
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val speed = speedList[position]
+            val speed = speedList[holder.bindingAdapterPosition]
             if (holder is PlaySpeedViewHolder) {
                 holder.playSpeed.text = speed.toString() + "X"
                 holder.itemView.setOnClickListener {
-                    currentSpeed = speedList[holder.bindingAdapterPosition]
+                    currentSpeed = speed
                     onClick?.let { block ->
                         block(speed)
                     }

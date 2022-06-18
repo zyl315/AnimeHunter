@@ -6,7 +6,6 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import com.zyl315.animehunter.R
 
 object ViewHolderType {
@@ -25,18 +24,16 @@ class EmptyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 class BangumiCover1ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val ivCover: ImageView = itemView.findViewById(R.id.iv_cover)
-    val tvNewName: TextView = itemView.findViewById(R.id.tv_newName)
-    val tvName: TextView = itemView.findViewById(R.id.tv_name)
-    val tvBangumiType: TextView = itemView.findViewById(R.id.tv_bangumiType)
-    val tvPremiereTime: TextView = itemView.findViewById(R.id.tv_premiereTime)
-    val tvPlayStatus: TextView = itemView.findViewById(R.id.tv_playStatus)
-    val tvPlotType: TextView = itemView.findViewById(R.id.tv_plotType)
+    val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
+    val tvType: TextView = itemView.findViewById(R.id.tv_type)
+    val tvLastUpdateTime: TextView = itemView.findViewById(R.id.tv_lastUpdateTime)
+    val tvStatus: TextView = itemView.findViewById(R.id.tv_status)
 }
 
 class BangumiCover2ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val ivCover: ImageView = itemView.findViewById(R.id.iv_cover)
-    val tvNewName: TextView = itemView.findViewById(R.id.tv_newName)
-    val tvName: TextView = itemView.findViewById(R.id.tv_name)
+    val tvStatus: TextView = itemView.findViewById(R.id.tv_status)
+    val tvTitle: TextView = itemView.findViewById(R.id.tv_title)
 }
 
 class HomeContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

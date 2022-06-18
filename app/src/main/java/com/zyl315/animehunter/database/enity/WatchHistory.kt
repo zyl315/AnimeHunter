@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.BaseBean
 import com.zyl315.animehunter.bean.age.BangumiDetailBean
 
@@ -19,6 +20,6 @@ data class WatchHistory(
     var duration: Long,
     var watchedPosition: Long,
     @Embedded
-    var bangumiBean: BangumiDetailBean
+    var bangumiCoverBean: BangumiCoverBean
 ) : BaseBean
 

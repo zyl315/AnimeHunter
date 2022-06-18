@@ -1,5 +1,6 @@
 package com.zyl315.animehunter.bean.age
 
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.BaseBean
 
 class HomeResultBean(
@@ -9,7 +10,7 @@ class HomeResultBean(
 
 class HomeContentBean(
     val name: String,
-    val bangumiBeanList: MutableList<BangumiBean>
+    val bangumiCoverBeanList: MutableList<BangumiCoverBean>
 ) : BaseBean
 
 class WeeklyPlayListBean(

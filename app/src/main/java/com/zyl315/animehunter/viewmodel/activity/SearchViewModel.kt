@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zyl315.animehunter.bean.age.SearchResultBean
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.impls.kudm.KudmDataSource
+import com.zyl315.animehunter.repository.impls.kudm.KudmDataSourceFactory
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 
 class SearchViewModel : ViewModel() {
-    private val dataSource  = DataSourceManager.getDataSource()
+    private var dataSource = DataSourceManager.getDataSource()
 
     val searchState: MutableLiveData<RequestState<SearchResultBean>> = MutableLiveData()
     var pageNumber: Int = 1
@@ -27,5 +29,9 @@ class SearchViewModel : ViewModel() {
 
     fun loadMoreData() {
         getSearchData(searchWord, pageNumber + 1)
+    }
+
+    fun setDataSource(datsSource: DataSourceManager.DataSource) {
+        dataSource = DataSourceManager.getDataSource(datsSource)
     }
 }

@@ -3,34 +3,34 @@ package com.zyl315.animehunter.ui.activity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.KeyEvent
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.qmuiteam.qmui.skin.QMUISkinManager
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivitySearchBinding
-import com.zyl315.animehunter.util.showToast
-import com.zyl315.animehunter.ui.adapter.BangumiAdapter
-import com.zyl315.animehunter.util.gone
-import com.zyl315.animehunter.util.invisible
-import com.zyl315.animehunter.util.visible
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.ui.adapter.BangumiSearchAdapter
+import com.zyl315.animehunter.util.*
 import com.zyl315.animehunter.viewmodel.activity.SearchViewModel
 
 class SearchActivity : BaseActivity<ActivitySearchBinding>() {
     private var lastSearchTime: Long = System.currentTimeMillis()
     private lateinit var viewModel: SearchViewModel
-    private lateinit var bangumiAdapter: BangumiAdapter
+    private lateinit var bangumiSearchAdapter: BangumiSearchAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
 
-        bangumiAdapter = BangumiAdapter(this)
+        bangumiSearchAdapter = BangumiSearchAdapter(this)
         viewModel.searchState.observe(this) { state ->
             state.success {
                 it.data.apply {
-                    bangumiAdapter.submitList(bangumiDetailList.toList())
+                    bangumiSearchAdapter.submitList(bangumiCoverList.toList())
                     mBinding.smartRefresh.visible(currentPage == 1)
                     mBinding.tvSearchTip.visible()
                     mBinding.tvSearchTip.text = getString(R.string.total_record).format(totalCount)
@@ -44,6 +44,8 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
             }
             mBinding.vsLoading.gone()
         }
+
+        mBinding.etSearch.requestFocus()
 
         mBinding.ivSearchClear.setOnClickListener {
             mBinding.etSearch.text = null
@@ -60,7 +62,11 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
 
         mBinding.rvSearchResult.apply {
             layoutManager = LinearLayoutManager(this@SearchActivity)
-            adapter = bangumiAdapter
+            adapter = bangumiSearchAdapter
+        }
+
+        mBinding.ivLeftSearchIcon.setOnClickListener {
+            showBottomDataSourceDialog()
         }
 
         searchTextChangeListener()
@@ -119,5 +125,26 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>() {
                 return true
             }
         })
+    }
+
+    private fun showBottomDataSourceDialog() {
+        val dataSourceMap = DataSourceManager.getAllDataSource()
+        val context = ContextThemeWrapper(this, R.style.QMUI_Compat_NoActionBar)
+        val builder = QMUIBottomSheet.BottomListSheetBuilder(context)
+            .setSkinManager(QMUISkinManager.of("Theme.AnimeHunter.QMUI", context)).setGravityCenter(true)
+            .setTitle(getString(R.string.switch_search_data_sources))
+            .setOnSheetItemClickListener { dialog, itemView, position, tag ->
+                dataSourceMap[tag]?.let {
+                    viewModel.setDataSource(it)
+                    search(viewModel.searchWord)
+                }
+                dialog?.dismiss()
+            }
+
+        dataSourceMap.keys.forEach { dataSource ->
+            builder.addItem(dataSource)
+        }
+
+        builder.build().show()
     }
 }

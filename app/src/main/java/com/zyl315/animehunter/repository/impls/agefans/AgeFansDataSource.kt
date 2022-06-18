@@ -1,6 +1,7 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
 import android.webkit.WebView
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.MaxRetryException
@@ -8,11 +9,11 @@ import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.execption.WebViewException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
@@ -23,7 +24,7 @@ import java.net.URLDecoder
 import java.util.concurrent.CountDownLatch
 
 class AgeFansDataSource : AbstractDataSource() {
-    private val mBangumiDetailList: MutableList<BangumiDetailBean> = mutableListOf()
+    private val mBangumiCoverList: MutableList<BangumiCoverBean> = mutableListOf()
     private var totalCount = 0
 
 
@@ -100,13 +101,10 @@ class AgeFansDataSource : AbstractDataSource() {
     }
 
     override suspend fun getCatalog(
-        url: String,
-        webView: WeakReference<WebView>,
-        webClient: MyWebViewClient
+        url: String, webView: WeakReference<WebView>, webClient: MyWebViewClient
     ): RequestState<SearchResultBean> {
         val countDownLatch: CountDownLatch = CountDownLatch(1)
-        var result: RequestState<SearchResultBean> =
-            RequestState.Error(Exception("Unknown Error"))
+        var result: RequestState<SearchResultBean> = RequestState.Error(Exception("Unknown Error"))
 
         withContext(Dispatchers.Main) {
             webClient.onComplete = { html ->
@@ -205,21 +203,20 @@ class AgeFansDataSource : AbstractDataSource() {
                     this.name = name
                     this.coverUrl = src
                     this.newName = ""
-                    this.bangumiType = infoList.getOrElse(1) { "" }
-                    this.originalWork = infoList.getOrElse(2) { "" }
-                    this.originalName = infoList.getOrElse(3) { "" }
-                    this.otherName = infoList.getOrElse(4) { "" }
-                    this.productionCompany = infoList.getOrElse(5) { "" }
-                    this.premiereTime = infoList.getOrElse(6) { "" }
-                    this.playStatus = infoList.getOrElse(7) { "" }
-                    this.plotType = infoList.getOrElse(8) { "" }
+                    this.bangumiType = infoList[1]
+                    this.originalWork = infoList[2]
+                    this.originalName = infoList[3]
+                    this.otherName = infoList[4]
+                    this.productionCompany = infoList[5]
+                    this.premiereTime = infoList[6]
+                    this.playStatus = infoList[7]
+                    this.plotType = infoList[8]
                     this.description = desc
                 }
 
                 return@withContext RequestState.Success(
                     PlayDetailResultBean(
-                        playSourceList,
-                        bangumiDetailBean
+                        playSourceList, bangumiDetailBean
                     )
                 )
             }.onFailure {
@@ -231,8 +228,7 @@ class AgeFansDataSource : AbstractDataSource() {
 
     override suspend fun getPlayUrl(url: String, retryCount: Int): RequestState<String> {
         return withContext(Dispatchers.IO) {
-            val playUrl =
-                url.replace(Regex(".*\\/play\\/(\\d+?)\\?playid=(\\d+)_(\\d+).*"), PLAY_URL)
+            val playUrl = url.replace(Regex(".*\\/play\\/(\\d+?)\\?playid=(\\d+)_(\\d+).*"), PLAY_URL)
             runCatching {
                 val body = MyOkHttpClient.getDoc(packUrl(playUrl), mapOf("Referer" to BASE_URL))
                 if (body == "err:timeout") {
@@ -276,6 +272,7 @@ class AgeFansDataSource : AbstractDataSource() {
             kotlin.runCatching {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(BASE_URL)))
                 val resultBean = processHomeHtml(doc)
+
                 return@withContext RequestState.Success(resultBean)
             }.getOrElse {
                 return@withContext RequestState.Error(it)
@@ -287,11 +284,9 @@ class AgeFansDataSource : AbstractDataSource() {
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(BASE_URL)))
-                val bangumiScript =
-                    doc.select("#container div.div_right.baseblock  script")[0].html()
+                val bangumiScript = doc.select("#container div.div_right.baseblock  script")[0].html()
                 val res: Sequence<MatchResult> = Regex("\\{\"[^\\}]+\"\\}").findAll(bangumiScript)
-                val weeklyPlayMap: MutableMap<Int, MutableList<BangumiWeekListBean>> =
-                    mutableMapOf()
+                val weeklyPlayMap: MutableMap<Int, MutableList<BangumiWeekListBean>> = mutableMapOf()
                 for (jsonStr in res) {
                     val jsonObject = JSONObject(jsonStr.value)
                     val bangumiWeekListBean = BangumiWeekListBean(
@@ -319,7 +314,7 @@ class AgeFansDataSource : AbstractDataSource() {
 
     private fun processBangumiHtml(doc: Element, page: Int = 1): SearchResultBean {
         if (page == 1) {
-            mBangumiDetailList.clear()
+            mBangumiCoverList.clear()
             val resultCount = doc.getElementById("result_count")?.text() ?: "0"
             totalCount = Regex("\\d+").find(resultCount)!!.value.toInt()
         }
@@ -333,27 +328,31 @@ class AgeFansDataSource : AbstractDataSource() {
             it.select("div.cell_imform_kv").forEach { cell ->
                 infoList.add(cell.child(1).text())
             }
+//            BangumiDetailBean(bangumiId).apply {
+//                this.name = title
+//                this.coverUrl = coverUrl
+//                this.newName = newName
+//                this.bangumiType = infoList.getOrElse(0) { "" }
+//                this.originalName = infoList.getOrElse(1) { "" }
+//                this.otherName = infoList.getOrElse(2) { "" }
+//                this.premiereTime = infoList.getOrElse(3) { "" }
+//                this.playStatus = infoList.getOrElse(4) { "" }
+//                this.originalWork = infoList.getOrElse(5) { "" }
+//                this.plotType = infoList.getOrElse(6) { "" }
+//                this.productionCompany = infoList.getOrElse(7) { "" }
+//                this.description = infoList.getOrElse(8) { "" }
+//            }
 
-            mBangumiDetailList.add(BangumiDetailBean(bangumiId).apply {
-                this.name = title
-                this.coverUrl = coverUrl
-                this.newName = newName
-                this.bangumiType = infoList.getOrElse(0) { "" }
-                this.originalName = infoList.getOrElse(1) { "" }
-                this.otherName = infoList.getOrElse(2) { "" }
-                this.premiereTime = infoList.getOrElse(3) { "" }
-                this.playStatus = infoList.getOrElse(4) { "" }
-                this.originalWork = infoList.getOrElse(5) { "" }
-                this.plotType = infoList.getOrElse(6) { "" }
-                this.productionCompany = infoList.getOrElse(7) { "" }
-                this.description = infoList.getOrElse(8) { "" }
-            })
+            mBangumiCoverList.add(BangumiCoverBean(DataSource.AGEFANS,
+                bangumiId,
+                title,
+                coverUrl,
+                infoList.getOrElse(0) { "" },
+                newName,
+                infoList.getOrElse(3) { "" }))
         }
         return SearchResultBean(
-            totalCount,
-            page,
-            totalCount == mBangumiDetailList.size,
-            mBangumiDetailList
+            totalCount, page, totalCount == mBangumiCoverList.size, mBangumiCoverList
         )
     }
 
@@ -362,20 +361,26 @@ class AgeFansDataSource : AbstractDataSource() {
         val left = doc.select("#container > div.div_left.baseblock")[0]
         left?.select("div.blocktitle")?.forEach { element ->
             val title = element.child(0).text()
-            val bangumiBeanList: MutableList<BangumiBean> = mutableListOf()
+            val bangumiCoverBeanList: MutableList<BangumiCoverBean> = mutableListOf()
             element.nextElementSibling()!!.select("li.anime_icon1").forEach {
                 val bangumiId = it.child(0).attr("href").replaceFirst("/detail/", "")
                 val coverUrl = packUrl(it.child(0).child(0).attr("src"))
                 val name = it.child(0).child(0).attr("alt")
-                val newName = it.child(0).child(1).text()
-                bangumiBeanList.add(BangumiBean(bangumiId, name, newName, coverUrl))
-            }
+                val status = it.child(0).child(1).text()
 
+                bangumiCoverBeanList.add(
+                    BangumiCoverBean(
+                        DataSource.AGEFANS, bangumiId, name, coverUrl, "", status, ""
+                    )
+                )
+            }
             contentList.add(
                 HomeContentBean(
-                    title, bangumiBeanList
+                    title, bangumiCoverBeanList
                 )
             )
+
+            contentList.reverse()
         }
         return HomeResultBean(contentList)
     }
@@ -393,15 +398,6 @@ class AgeFansDataSource : AbstractDataSource() {
                 url.startsWith("/") -> "$BASE_URL$url"
                 else -> "$BASE_URL/$url"
             }
-        }
-    }
-}
-
-fun main() {
-    runBlocking {
-        launch {
-            val res = AgeFansDataSource().getWeeklyPlayList()
-            print(res)
         }
     }
 }

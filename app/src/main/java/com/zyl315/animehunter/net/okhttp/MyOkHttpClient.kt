@@ -1,18 +1,25 @@
 package com.zyl315.animehunter.net.okhttp
 
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 
 object MyOkHttpClient {
-    val client: OkHttpClient by lazy {
+    private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .protocols(listOf(Protocol.HTTP_1_1))
             .cookieJar(MyCookieJar())
             .build()
     }
 
-    fun getDoc(url: String, header: Map<String, String>? = null): String {
-        return getResponse(url, header).body!!.string()
+    fun getDoc(url: String, header: Map<String, String>? = null, isGBK: Boolean = false): String {
+        return if (isGBK) {
+            java.lang.String(getResponse(url, header).body!!.bytes(), "GBK").toString()
+        } else {
+            getResponse(url, header).body!!.string()
+        }
+
     }
 
     fun getResponse(url: String, header: Map<String, String>? = null): Response {

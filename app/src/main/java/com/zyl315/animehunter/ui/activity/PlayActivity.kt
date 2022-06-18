@@ -2,6 +2,7 @@ package com.zyl315.animehunter.ui.activity
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
@@ -10,13 +11,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
-import com.zyl315.animehunter.ui.fragment.PlaySourceFragment
+import com.zyl315.animehunter.ui.fragment.player.PlaySourceFragment
 import com.zyl315.animehunter.ui.widget.BangumiVideoController
 import com.zyl315.animehunter.util.BackHandlerHelper
 import com.zyl315.animehunter.util.showToast
@@ -36,12 +38,17 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.bangumiId = intent.getStringExtra(BANGUMI_ID)!!
-
-        initView()
-        initListener()
-        initPlayer()
-        loadData()
+        val coverBean = intent.getSerializableExtra(BANGUMI_COVER)
+        if (coverBean is BangumiCoverBean) {
+            viewModel.bangumiCoverBean = coverBean
+            initView()
+            initListener()
+            initPlayer()
+            loadData()
+        } else {
+            showToast(this, R.string.unkonwn_error)
+            finish()
+        }
     }
 
     private fun initView() {
@@ -61,6 +68,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             rvPlayUrlList.adapter = mPlaySourceAdapter
             rvPlayUrlList.setHasFixedSize(true)
         }
+
+        window.statusBarColor = Color.BLACK
     }
 
     private fun initListener() {
@@ -109,13 +118,15 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
         viewModel.playDetailResultState.observe(this) { state ->
             state.success {
-                mBinding.tvName.text = viewModel.bangumiDetailBean.name
+                mBinding.tvTitle.text = viewModel.bangumiCoverBean.title
                 mBinding.tvDescription.text = viewModel.bangumiDetailBean.description
                 mBinding.tabPlaySource.apply {
                     removeAllTabs()
                     for (index in viewModel.playSourceList.indices) {
                         addTab(
-                            newTab().setText("播放源${index + 1}"),
+                            newTab().setText(
+                                context.getString(R.string.play_source).format(index + 1)
+                            ),
                             index == viewModel.playSourceIndex
                         )
                     }
@@ -162,7 +173,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun loadData() {
-        viewModel.getPlaySource(viewModel.bangumiId)
+        viewModel.getPlaySource(viewModel.bangumiCoverBean.bangumiID)
     }
 
     private fun initPlayer() {
@@ -241,6 +252,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     companion object {
-        const val BANGUMI_ID = "BANGUMI_ID"
+        const val BANGUMI_COVER = "BANGUMI_COVER"
     }
 }

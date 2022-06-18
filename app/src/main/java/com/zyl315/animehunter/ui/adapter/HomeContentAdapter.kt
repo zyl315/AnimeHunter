@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
+import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.BangumiBean
 import com.zyl315.animehunter.bean.age.HomeContentBean
-import com.zyl315.animehunter.ui.adapter.decoration.BangumiItemDecoration
 import com.zyl315.animehunter.ui.adapter.holder.HomeContentViewHolder
 
 class HomeContentAdapter(
@@ -27,7 +27,6 @@ class HomeContentAdapter(
         holder.apply {
             rvBangumi.layoutManager = GridLayoutManager(activity, spanCount)
             rvBangumi.setHasFixedSize(true)
-//            rvBangumi.addItemDecoration(BangumiItemDecoration())
             bangumiAdapter = BangumiAdapter3(activity)
             rvBangumi.adapter = bangumiAdapter
         }
@@ -36,16 +35,16 @@ class HomeContentAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = dataList[position]
+        val homeContentBean = dataList[position]
         if (holder is HomeContentViewHolder) {
             holder.apply {
-                tvTitle.text = item.name
-                bangumiAdapter.submitList(subList(item.bangumiBeanList))
+                tvTitle.text = homeContentBean.name
+                bangumiAdapter.submitList(subList(homeContentBean.bangumiCoverBeanList))
             }
         }
     }
 
-    private fun subList(list: MutableList<BangumiBean>): MutableList<BangumiBean> {
+    private fun subList(list: MutableList<BangumiCoverBean>): MutableList<BangumiCoverBean> {
         return if (list.size < spanCount) {
             list
         } else {

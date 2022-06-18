@@ -2,7 +2,6 @@ package com.zyl315.animehunter.ui.widget
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.opengl.Visibility
 import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
@@ -21,8 +20,8 @@ import com.zyl315.player.util.PlayerUtils
 
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.ui.activity.PlayActivity
-import com.zyl315.animehunter.ui.fragment.PlaySourceFragment
-import com.zyl315.animehunter.ui.fragment.PlaySpeedFragment
+import com.zyl315.animehunter.ui.fragment.player.PlaySourceFragment
+import com.zyl315.animehunter.ui.fragment.player.PlaySpeedFragment
 import com.zyl315.animehunter.ui.fragment.PopupFragment
 
 
@@ -230,7 +229,9 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
             R.id.tv_playSpeed -> {
                 mControlWrapper.hide()
                 if (!this::playSpeedFragment.isInitialized) {
-                    playSpeedFragment = PlaySpeedFragment(mControlWrapper.speed)
+                    playSpeedFragment = PlaySpeedFragment().apply {
+                        currentSpeed = mControlWrapper.speed
+                    }
                     playSpeedFragment.onClick = {
                         mControlWrapper.speed = it
                         mPlaySpeed.text = context.getString(R.string.play_speed).format(it)

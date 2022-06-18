@@ -17,10 +17,10 @@ class DDUIEmptyView(
     defStyleAttr: Int
 ) :
     ConstraintLayout(context, attrs, defStyleAttr) {
-    private lateinit var mLoadView: ProgressBar
-    private lateinit var mTitleTextView: TextView
-    private lateinit var mDetailTextView: TextView
-    private lateinit var mButton: Button
+    private  var mLoadView: ProgressBar
+    private  var mTitleTextView: TextView
+    private  var mDetailTextView: TextView
+    private  var mButton: Button
 
 
     constructor(context: Context) : this(context, null)

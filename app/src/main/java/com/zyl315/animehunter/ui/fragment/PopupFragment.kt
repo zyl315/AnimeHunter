@@ -19,6 +19,11 @@ abstract class PopupFragment<T : ViewBinding> :
         return BackHandlerHelper.handleBackPress(this)
     }
 
+    override fun onPause() {
+        super.onPause()
+        dismiss()
+    }
+
     fun show(manager: FragmentManager, containerViewId: Int) {
         isShow = true
         val ft: FragmentTransaction = manager.beginTransaction()
