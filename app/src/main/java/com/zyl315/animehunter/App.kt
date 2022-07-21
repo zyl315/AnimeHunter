@@ -23,7 +23,7 @@ class App : Application() {
                 .build()
         )
 
-        DataSourceManager.dataSourceFactory = AgeFansDataSourceFactory()
+        DataSourceManager.dataSource= AgeFansDataSourceFactory().createDataSource()
 
 //        DarkModeUtils.init(this)
     }

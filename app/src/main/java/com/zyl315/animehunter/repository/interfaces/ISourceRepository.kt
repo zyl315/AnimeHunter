@@ -37,7 +37,7 @@ interface ISearchParser {
 
     suspend fun getMoreBangumi(url: String, page: Int): RequestState<SearchResultBean>
 
-    suspend fun getCatalog(html: String): RequestState<SearchResultBean>
+    suspend fun getCatalog(html: String, page: Int): RequestState<SearchResultBean>
 
     suspend fun getCatalog(
         url: String,

@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.*
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivityCatalogBinding
+import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.adapter.BangumiAdapter2
 import com.zyl315.animehunter.ui.adapter.CatalogAdapter
@@ -61,7 +64,6 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             rvCatalog.adapter = catalogAdapter
             rvBangumi.layoutManager = GridLayoutManager(this@CatalogActivity, 3)
             rvBangumi.adapter = bangumiAdapter
-//            rvBangumi.addItemDecoration(BangumiItemDecoration())
         }
     }
 
@@ -77,9 +79,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             }
 
             override fun onReceivedError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                error: WebResourceError?
+                view: WebView?, request: WebResourceRequest?, error: WebResourceError?
             ) {
                 super.onReceivedError(view, request, error)
                 viewModel.catalogState.value = RequestState.Error()
@@ -88,17 +88,16 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
     }
 
     private fun initListener() {
-        catalogAdapter.onTabItemSelectedListener =
-            object : CatalogAdapter.OnTabItemSelectedListener {
-                override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
-                    if (mBinding.smartRefreshLayout.autoRefreshAnimationOnly()) {
-                        mBinding.tvCatalogExpand.text = getCatalogText()
-                        loadData(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
-                    } else {
-                        showToast(resId = R.string.still_loading)
-                    }
+        catalogAdapter.onTabItemSelectedListener = object : CatalogAdapter.OnTabItemSelectedListener {
+            override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
+                if (mBinding.smartRefreshLayout.autoRefreshAnimationOnly()) {
+                    mBinding.tvCatalogExpand.text = getCatalogText()
+                    loadData(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
+                } else {
+                    showToast(resId = R.string.still_loading)
                 }
             }
+        }
 
 
         mBinding.run {
@@ -116,8 +115,8 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             }
 
             appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-                if (abs(verticalOffset) >= appBarLayout.totalScrollRange && verticalOffset != 0
-                    && tvCatalogExpand.text.toString().isNotEmpty()
+                if (abs(verticalOffset) >= appBarLayout.totalScrollRange && verticalOffset != 0 && tvCatalogExpand.text.toString()
+                        .isNotEmpty()
                 ) {
                     tvCatalogExpand.visible()
                 } else {
@@ -156,8 +155,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                         smartRefreshLayout.finishRefresh(1000, false, null)
                     } else {
                         emptyView.show(
-                            getString(R.string.loaded_failed),
-                            getString(R.string.retry_click)
+                            getString(R.string.loaded_failed), getString(R.string.retry_click)
                         ) {
                             loadData(viewModel.catalogUrl)
                             emptyView.show(true)
@@ -186,15 +184,18 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
 
     private fun loadData(url: String) {
         mBinding.smartRefreshLayout.setNoMoreData(false)
-        webView.loadUrl(url)
+        if (viewModel.dataSource is AgeFansDataSource) {
+            webView.loadUrl(url)
+        } else {
+            viewModel.getCatalog(viewModel.catalogUrl)
+        }
     }
 
     private fun getCatalogText(): String {
         val selectedTagList = mutableListOf<String>()
         viewModel.catalogList.value?.forEach { tag ->
             tag.catalogItemBeanList.forEach { item ->
-                if (item.isSelected && item.name != "全部")
-                    selectedTagList.add(item.name)
+                if (item.isSelected && item.name != "全部") selectedTagList.add(item.name)
             }
         }
         return selectedTagList.joinToString(separator = "·")

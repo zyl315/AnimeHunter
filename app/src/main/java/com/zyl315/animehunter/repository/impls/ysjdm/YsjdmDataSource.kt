@@ -3,26 +3,19 @@ package com.zyl315.animehunter.repository.impls.ysjdm
 import android.webkit.WebView
 import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.*
-import com.zyl315.animehunter.execption.IPCheckException
-import com.zyl315.animehunter.execption.MaxRetryException
-import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
-import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
-import com.zyl315.animehunter.repository.impls.kudm.KudmDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
-import com.zyl315.animehunter.util.URLCodeUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.lang.ref.WeakReference
-import java.net.URLDecoder
 
 class YsjdmDataSource : AbstractDataSource() {
     private val mBangumiCoverBeanList: MutableList<BangumiCoverBean> = mutableListOf()
@@ -32,7 +25,7 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     override fun getDefaultCatalogUrl(): String {
-        TODO("Not yet implemented")
+        return DEFAULT_CATALOG_URL
     }
 
     override suspend fun checkHost() {
@@ -47,7 +40,7 @@ class YsjdmDataSource : AbstractDataSource() {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(url))
                 val totalCount = matchDigital(doc.select(".foot.foot_nav").prev().html())
 
-                doc.select("li.searchlist_item").forEach {
+                doc.select("div.search_box li.searchlist_item").forEach {
                     val bangumiId = matchDigital(it.child(0).child(0).attr("href")).toString()
                     val coverUrl = packUrl(it.child(0).child(0).attr("data-original"))
                     val title = it.child(0).child(0).attr("title")
@@ -76,11 +69,46 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     override suspend fun getMoreBangumi(url: String, page: Int): RequestState<SearchResultBean> {
-        TODO("Not yet implemented")
+        return getCatalog(url+"?page=${page}", page)
     }
 
-    override suspend fun getCatalog(html: String): RequestState<SearchResultBean> {
-        TODO("Not yet implemented")
+    override suspend fun getCatalog(html: String, page: Int): RequestState<SearchResultBean> {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val catalogUrl = packUrl(html)
+                val doc = Jsoup.parse(MyOkHttpClient.getDoc(catalogUrl))
+                val catalogList = mutableListOf<CatalogTagBean>()
+                val elementList = doc.select("ul.screen_list")
+                elementList.forEach { li ->
+                    val tagName = if (li == elementList.last()) {
+                        "排序"
+                    } else {
+                        li.select("li > span.text_muted")[0].text()
+                    }
+                    val catalogTagBean = CatalogTagBean(tagName)
+                    li.select("li a").forEach {
+                        val isSelected = if (li == elementList.last()) {
+                            it.parent()!!.hasClass("hl_fl")
+                        } else {
+                            it.parent()!!.hasClass("hl")
+                        }
+
+                        val href = it.attr("href")
+                        val name = it.text()
+                        catalogTagBean.catalogItemBeanList.add(
+                            CatalogItemBean(name, href, isSelected)
+                        )
+                    }
+                    catalogList.add(catalogTagBean)
+                }
+
+                val searchResultBean = processBangumiHtml(doc, page)
+                searchResultBean.catalogTagList = catalogList
+                return@withContext RequestState.Success(searchResultBean)
+            }.getOrElse {
+                return@withContext RequestState.Error(it)
+            }
+        }
     }
 
     override suspend fun getCatalog(
@@ -90,7 +118,7 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     override suspend fun getPlaySource(bangumiId: String): RequestState<PlayDetailResultBean> {
-        val url = KudmDataSource.packUrl("/index.php/vod/detail?id=$bangumiId")
+        val url = packUrl("/index.php/vod/detail?id=$bangumiId")
         return withContext(Dispatchers.IO) {
             runCatching {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(url))
@@ -136,7 +164,7 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     override fun getCatalogUrl(url: String): String {
-        TODO("Not yet implemented")
+        return url
     }
 
     override suspend fun getHomeContent(): RequestState<HomeResultBean> {
@@ -147,8 +175,31 @@ class YsjdmDataSource : AbstractDataSource() {
         TODO("Not yet implemented")
     }
 
+    private fun processBangumiHtml(doc: Element, page: Int = 1): SearchResultBean {
+        if (page == 1) {
+            mBangumiCoverBeanList.clear()
+        }
+        val totalCount = matchDigital(doc.select(".foot.foot_nav").prev().html())
+        doc.select("div.row li.vodlist_item a.vodlist_thumb").forEach {
+            val bangumiId = matchDigital(it.attr("href")).toString()
+            val coverUrl = packUrl(it.attr("data-original"))
+            val title = it.attr("title")
+            val status = it.select("span.pic_text.text_right").text()
+
+            mBangumiCoverBeanList.add(
+                BangumiCoverBean(
+                    DataSourceManager.DataSource.YSJDM, bangumiId, title, coverUrl, "", status, ""
+                )
+            )
+        }
+        return SearchResultBean(
+            totalCount, page, totalCount == mBangumiCoverBeanList.size, mBangumiCoverBeanList
+        )
+    }
+
     companion object {
         var BASE_URL = "https://www.ysjdm.net"
+        var DEFAULT_CATALOG_URL = "${BASE_URL}/index.php/vod/show/id/20.html"
 
         fun packUrl(url: String): String {
             return when {
@@ -169,7 +220,7 @@ class YsjdmDataSource : AbstractDataSource() {
 fun main() {
     runBlocking {
         launch {
-            val res = YsjdmDataSource().getPlaySource("1657")
+            val res = YsjdmDataSource().getCatalog(YsjdmDataSource.DEFAULT_CATALOG_URL, 1)
             print(res)
         }
     }

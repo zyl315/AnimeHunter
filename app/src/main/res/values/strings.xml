@@ -40,4 +40,6 @@
     <string name="play_source">播放源%s</string>
     <string name="unkonwn_error">未知错误</string>
     <string name="switch_search_data_sources">切换搜索数据源</string>
+    <string name="gettting_the_play_url">获取播放链接中</string>
+    <string name="request_too_frequently">请求过于频繁</string>
 </resources>

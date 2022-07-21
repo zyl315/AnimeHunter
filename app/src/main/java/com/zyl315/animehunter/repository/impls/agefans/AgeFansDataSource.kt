@@ -9,7 +9,6 @@ import com.zyl315.animehunter.execption.UnSupportPlayTypeException
 import com.zyl315.animehunter.execption.WebViewException
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
-import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
@@ -69,7 +68,7 @@ class AgeFansDataSource : AbstractDataSource() {
         return getBangumi(nextPageUrl, page)
     }
 
-    override suspend fun getCatalog(html: String): RequestState<SearchResultBean> {
+    override suspend fun getCatalog(html: String, page: Int): RequestState<SearchResultBean> {
         runCatching {
             val document = Jsoup.parse(html)
             val catalogList = mutableListOf<CatalogTagBean>()
@@ -386,7 +385,7 @@ class AgeFansDataSource : AbstractDataSource() {
     }
 
     companion object {
-        var BASE_URL = "https://www.agemys.com"
+        var BASE_URL = "https://www.agemys.cc"
         var REFERRAL_URL = "https://dx.mbn98.com/?u=http://age.tv/&p=/"
         var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
         var DEFAULT_CATALOG_URL = "${BASE_URL}/catalog/all-all-all-all-all-time-1"

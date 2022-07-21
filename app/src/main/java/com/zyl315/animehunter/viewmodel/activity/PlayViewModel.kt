@@ -28,8 +28,7 @@ class PlayViewModel : ViewModel() {
 
     val currentPlayTag: MutableLiveData<String> = MutableLiveData()
 
-    val playDetailResultState: MutableLiveData<RequestState<PlayDetailResultBean>> =
-        MutableLiveData()
+    val playDetailResultState: MutableLiveData<RequestState<PlayDetailResultBean>> = MutableLiveData()
     val playUrlState: MutableLiveData<RequestState<String>> = MutableLiveData()
 
     lateinit var bangumiCoverBean: BangumiCoverBean
@@ -50,7 +49,7 @@ class PlayViewModel : ViewModel() {
                 success {
                     bangumiDetailBean = it.data.bangumiDetailBean
                     playSourceList = it.data.playSourceBeanList
-                    playSourceList.forEachIndexed { index, playSourceBean ->
+                    playSourceList.forEachIndexed { index, _ ->
                         if (!continuePlay) playSourceIndex = index
                     }
                 }
@@ -67,17 +66,17 @@ class PlayViewModel : ViewModel() {
             currentEpisodeBean = episodeList[playEpisodeIndex]
             currentPlayTag.value = getCurrentPlayTag()
 
-            var result = playUrlState.value
+            playUrlState.value = RequestState.Loading
+
             if (currentEpisodeBean.url.isBlank()) {
-                result = dataSource.getPlayUrl(currentEpisodeBean.href).apply {
+                playUrlState.value = dataSource.getPlayUrl(currentEpisodeBean.href).apply {
                     success {
                         currentEpisodeBean.url = it.data
                     }
                 }
             } else {
-                result = RequestState.Success(currentEpisodeBean.url)
+                playUrlState.value = RequestState.Success(currentEpisodeBean.url)
             }
-            playUrlState.postValue(result)
         }
     }
 

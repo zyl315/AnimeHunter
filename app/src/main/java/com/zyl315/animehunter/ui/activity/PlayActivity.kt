@@ -16,6 +16,7 @@ import com.zyl315.animehunter.bean.age.EpisodeBean
 import com.zyl315.animehunter.databinding.ActivityPlayBinding
 import com.zyl315.animehunter.execption.IPCheckException
 import com.zyl315.animehunter.execption.UnSupportPlayTypeException
+import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.adapter.PlaySourceAdapter
 import com.zyl315.animehunter.ui.adapter.interfaces.OnItemClickListener
 import com.zyl315.animehunter.ui.fragment.player.PlaySourceFragment
@@ -52,8 +53,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun initView() {
-        mPlaySourceAdapter =
-            PlaySourceAdapter(GridLayoutManager.HORIZONTAL, viewModel.playEpisodeIndex)
+        mPlaySourceAdapter = PlaySourceAdapter(GridLayoutManager.HORIZONTAL, viewModel.playEpisodeIndex)
 
         mPlaySourceAdapter.onItemClickListener = object : OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -63,8 +63,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         }
 
         mBinding.run {
-            rvPlayUrlList.layoutManager =
-                GridLayoutManager(this@PlayActivity, 1, GridLayoutManager.HORIZONTAL, false)
+            rvPlayUrlList.layoutManager = GridLayoutManager(this@PlayActivity, 1, GridLayoutManager.HORIZONTAL, false)
             rvPlayUrlList.adapter = mPlaySourceAdapter
             rvPlayUrlList.setHasFixedSize(true)
         }
@@ -95,8 +94,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             })
 
             tvExpand.setOnClickListener {
-                val playSourceFragment =
-                    PlaySourceFragment(Gravity.BOTTOM)
+                val playSourceFragment = PlaySourceFragment(Gravity.BOTTOM)
                 playSourceFragment.backgroundColorId = R.color.card_background
                 playSourceFragment.show(supportFragmentManager, R.id.fragment_container)
             }
@@ -126,8 +124,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                         addTab(
                             newTab().setText(
                                 context.getString(R.string.play_source).format(index + 1)
-                            ),
-                            index == viewModel.playSourceIndex
+                            ), index == viewModel.playSourceIndex
                         )
                     }
                 }
@@ -140,8 +137,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
             state.error {
                 mBinding.dduiEmptyView.show(
-                    getString(R.string.get_play_source_failed),
-                    getString(R.string.retry_click)
+                    getString(R.string.get_play_source_failed), getString(R.string.retry_click)
                 ) {
                     mBinding.dduiEmptyView.show(true)
                     loadData()
@@ -150,13 +146,17 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         }
 
         viewModel.playUrlState.observe(this) { state ->
+            if (state is RequestState.Loading) {
+                showToast(resId = R.string.gettting_the_play_url)
+            }
+
             state.success {
                 starPlay(viewModel.currentEpisodeBean)
             }
 
             state.error {
                 when (it.throwable) {
-                    is IPCheckException -> showToast(message = "请求过于频繁")
+                    is IPCheckException -> showToast(resId = R.string.request_too_frequently)
                     is UnSupportPlayTypeException -> openInBrowser()
                     else -> showToast(resId = R.string.get_play_url_failed)
                 }
@@ -201,9 +201,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun openInBrowser() {
         val snackbar = Snackbar.make(
-            mBinding.playerView,
-            getString(R.string.unsupport_playback_links),
-            Snackbar.LENGTH_LONG
+            mBinding.playerView, getString(R.string.unsupport_playback_links), Snackbar.LENGTH_LONG
         )
         snackbar.setAction(getString(R.string.confirm)) {
             val uri = Uri.parse(viewModel.currentEpisodeBean.let {
@@ -211,8 +209,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             })
             val intent = Intent(Intent.ACTION_VIEW, uri)
             if (packageManager.resolveActivity(
-                    intent,
-                    PackageManager.MATCH_DEFAULT_ONLY
+                    intent, PackageManager.MATCH_DEFAULT_ONLY
                 ) != null
             ) {
                 startActivity(intent)

@@ -9,18 +9,18 @@ object DataSourceManager {
         AGEFANS, KUDM, YSJDM, UNKNOWN
     }
 
-    lateinit var dataSourceFactory: AbstractDataSourceFactory<AbstractDataSource>
+    var dataSource: AbstractDataSource = AgeFansDataSourceFactory().createDataSource()
 
-    fun getDataSource(dataSource: DataSource? = null): AbstractDataSource {
-        return when (dataSource) {
+    fun getDataSource(dataSourceName: DataSource? = null): AbstractDataSource {
+        return when (dataSourceName) {
             DataSource.AGEFANS -> AgeFansDataSourceFactory().createDataSource()
             DataSource.KUDM -> KudmDataSourceFactory().createDataSource()
             DataSource.YSJDM -> YsjdmDataSourceFactory().createDataSource()
-            else -> dataSourceFactory.createDataSource()
+            else -> dataSource
         }
     }
 
     fun getAllDataSource(): Map<String, DataSource> {
-        return mapOf("AGE" to DataSource.AGEFANS, "KUDM" to DataSource.KUDM, "异世界动漫" to DataSource.YSJDM)
+        return mapOf("AGEFANS" to DataSource.AGEFANS, "KUDM" to DataSource.KUDM, "YSJDM" to DataSource.YSJDM)
     }
 }

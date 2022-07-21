@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.BangumiWeekListBean
-import com.zyl315.animehunter.repository.datasource.DataSourceManager
 import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
 import com.zyl315.animehunter.ui.activity.PlayActivity
 

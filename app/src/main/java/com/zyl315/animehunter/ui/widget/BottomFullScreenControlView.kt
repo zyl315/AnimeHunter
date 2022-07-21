@@ -28,8 +28,7 @@ import com.zyl315.animehunter.ui.fragment.PopupFragment
 /**
  * 底部控制栏
  */
-class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClickListener,
-    OnSeekBarChangeListener {
+class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClickListener, OnSeekBarChangeListener {
     private lateinit var mControlWrapper: ControlWrapper
     private var mTotalTime: TextView
     private var mCurrTime: TextView
@@ -51,9 +50,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+        context, attrs, defStyleAttr
     )
 
     private val layoutId: Int
@@ -61,7 +58,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
 
 
     /**
-     * 是否显示底部进度条，默认显示
+     * 是否显示底部进度条，默认不显示
      */
     fun showBottomProgress(isShow: Boolean) {
         mIsShowBottomProgress = isShow
@@ -106,6 +103,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
                 mBottomProgress.secondaryProgress = 0
                 mVideoProgress.progress = 0
                 mVideoProgress.secondaryProgress = 0
+                mPlaySpeed.text = "1.0X"
             }
             VideoView.STATE_START_ABORT, VideoView.STATE_PREPARING, VideoView.STATE_PREPARED, VideoView.STATE_ERROR -> visibility =
                 GONE
@@ -220,8 +218,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
                 val activity = PlayerUtils.scanForActivity(context)
                 if (activity is PlayActivity) {
                     playSourceFragment.show(
-                        activity.supportFragmentManager,
-                        R.id.selections_container
+                        activity.supportFragmentManager, R.id.selections_container
                     )
                 }
                 currentPopupFragment = playSourceFragment
@@ -240,8 +237,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
                 val activity = PlayerUtils.scanForActivity(context)
                 if (activity is PlayActivity) {
                     playSpeedFragment.show(
-                        activity.supportFragmentManager,
-                        R.id.selections_container
+                        activity.supportFragmentManager, R.id.selections_container
                     )
                 }
                 currentPopupFragment = playSpeedFragment
@@ -309,7 +305,7 @@ class BottomFullScreenControlView : FrameLayout, IControlComponent, View.OnClick
         mSelections.setOnClickListener(this)
         mPlaySpeed = findViewById(R.id.tv_playSpeed)
         mPlaySpeed.setOnClickListener(this)
-        mPlaySpeed.text = context.getString(R.string.play_speed).format(1.0)
+        mPlaySpeed.text = "1.0X"
 
         //5.1以下系统SeekBar高度需要设置成WRAP_CONTENT
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {

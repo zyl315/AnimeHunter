@@ -7,7 +7,6 @@ import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
-import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import com.zyl315.animehunter.util.URLCodeUtil
@@ -78,7 +77,7 @@ class KudmDataSource : AbstractDataSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCatalog(html: String): RequestState<SearchResultBean> {
+    override suspend fun getCatalog(html: String, page: Int): RequestState<SearchResultBean> {
         TODO("Not yet implemented")
     }
 

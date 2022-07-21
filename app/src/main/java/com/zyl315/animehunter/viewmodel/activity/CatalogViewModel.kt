@@ -12,7 +12,7 @@ import com.zyl315.animehunter.repository.interfaces.RequestState
 import kotlinx.coroutines.launch
 
 class CatalogViewModel : ViewModel() {
-    private val dataSource: AbstractDataSource = DataSourceManager.getDataSource()
+    val dataSource: AbstractDataSource = DataSourceManager.getDataSource(DataSourceManager.DataSource.YSJDM)
     var catalogUrl = dataSource.getDefaultCatalogUrl()
 
     var catalogList: MutableLiveData<List<CatalogTagBean>> = MutableLiveData()
@@ -27,27 +27,26 @@ class CatalogViewModel : ViewModel() {
 
     fun getCatalog(html: String) {
         viewModelScope.launch {
-            catalogState.value =
-                dataSource.getCatalog(html).success {
-                    refreshCatalogList = it.data.catalogTagList!!
-                    if (catalogList.value == null) {
-                        catalogList.postValue(refreshCatalogList)
-                    }
-                    nextPage = it.data.currentPage + 1
+            catalogState.value = dataSource.getCatalog(html, nextPage).success {
+                refreshCatalogList = it.data.catalogTagList!!
+                if (catalogList.value == null) {
+                    catalogList.postValue(refreshCatalogList)
                 }
+                nextPage = it.data.currentPage + 1
+            }
         }
     }
 
     fun getMoreBangumi() {
         viewModelScope.launch {
-            bangumiState.value = dataSource.getMoreBangumi(catalogUrl, nextPage)
-                .success {
+            bangumiState.value = dataSource.getMoreBangumi(catalogUrl, nextPage).success {
                     nextPage = it.data.currentPage + 1
                 }
         }
     }
 
     fun getCatalogUrl(catalogTagPosition: Int, tabItemPosition: Int): String {
+        nextPage = 1
         catalogUrl = if (refreshCatalogList.isEmpty()) {
             catalogUrl
         } else {
