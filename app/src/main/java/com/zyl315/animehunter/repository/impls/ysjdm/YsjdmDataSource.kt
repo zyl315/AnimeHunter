@@ -6,6 +6,7 @@ import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.net.okhttp.MyOkHttpClient
 import com.zyl315.animehunter.repository.datasource.AbstractDataSource
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
+import com.zyl315.animehunter.repository.impls.agefans.AgeFansDataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,7 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     override suspend fun getMoreBangumi(url: String, page: Int): RequestState<SearchResultBean> {
-        return getCatalog(url+"?page=${page}", page)
+        return getCatalog(url + "?page=${page}", page)
     }
 
     override suspend fun getCatalog(html: String, page: Int): RequestState<SearchResultBean> {
@@ -155,12 +156,23 @@ class YsjdmDataSource : AbstractDataSource() {
                 val jsonStr = Regex("\\{.*\\}").find(doc.select("div.play_box script")[0].html())!!.value
                 val playJson = JSONObject(jsonStr)
                 val playUrl = playJson.getString("url")
+                if (playUrl.contains("onopen")) {
+                    return@withContext RequestState.Success(getEncryptedPlayUrl(playUrl))
+                }
                 return@withContext RequestState.Success(playUrl)
             }.getOrElse {
                 it.printStackTrace()
                 return@withContext RequestState.Error(it)
             }
         }
+    }
+
+    fun getEncryptedPlayUrl(url: String): String {
+        val doc = Jsoup.parse(MyOkHttpClient.getDoc(ENCRYPTED_URL + url, mapOf("Referer" to BASE_URL)))
+        val jsonStr = Regex("\"id\":.*\"").find(doc.select("body script")[0].html())!!.value
+        val jsonObj = JSONObject("{$jsonStr}")
+        val id = jsonObj.getString("id")
+        return "https://bf3.sbdm.cc/runtime/Aliyun/${id}.m3u8"
     }
 
     override fun getCatalogUrl(url: String): String {
@@ -198,8 +210,10 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     companion object {
-        var BASE_URL = "https://www.ysjdm.net"
+        var BASE_URL = "https://www.gqdm.net"
         var DEFAULT_CATALOG_URL = "${BASE_URL}/index.php/vod/show/id/20.html"
+        var BASE_SOURCE_URL = "https://bf.sbdm.cc/"
+        var ENCRYPTED_URL = "https://bf.sbdm.cc/m3u8.php?url="
 
         fun packUrl(url: String): String {
             return when {

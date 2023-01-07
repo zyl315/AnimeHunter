@@ -13,9 +13,10 @@ class CatalogAdapter : ListAdapter<CatalogTagBean, CatalogViewHolder>(DIFF_CALLB
     var onTabItemSelectedListener: OnTabItemSelectedListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatalogViewHolder {
-        return CatalogViewHolder(
+        val catalogViewHolder = CatalogViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.item_catalog_tab, parent, false)
         )
+        return  catalogViewHolder
     }
 
     override fun onBindViewHolder(holder: CatalogViewHolder, position: Int) {

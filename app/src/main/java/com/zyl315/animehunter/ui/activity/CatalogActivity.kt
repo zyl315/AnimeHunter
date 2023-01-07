@@ -2,12 +2,14 @@ package com.zyl315.animehunter.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.webkit.*
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
+import com.qmuiteam.qmui.skin.QMUISkinManager
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet
 import com.zyl315.animehunter.R
 import com.zyl315.animehunter.databinding.ActivityCatalogBinding
 import com.zyl315.animehunter.repository.datasource.DataSourceManager
@@ -18,6 +20,7 @@ import com.zyl315.animehunter.ui.adapter.CatalogAdapter
 import com.zyl315.animehunter.ui.adapter.EmptyAdapter
 import com.zyl315.animehunter.ui.adapter.holder.ViewHolderType
 import com.zyl315.animehunter.util.gone
+import com.zyl315.animehunter.util.invisible
 import com.zyl315.animehunter.util.showToast
 import com.zyl315.animehunter.util.visible
 import com.zyl315.animehunter.viewmodel.activity.CatalogViewModel
@@ -31,17 +34,24 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
     lateinit var emptyAdapter: EmptyAdapter
     private var isInitialized = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initView()
         initWebView()
+        initView()
         initListener()
+        initObserver()
         loadData(viewModel.catalogUrl)
     }
 
     override fun getBinding() = ActivityCatalogBinding.inflate(layoutInflater)
 
+    fun reload() {
+        isInitialized = false
+        mBinding.smartRefreshLayout.invisible()
+        mBinding.emptyView.show(true)
+        initView()
+        loadData(viewModel.catalogUrl)
+    }
 
     private fun initView() {
         catalogAdapter = CatalogAdapter()
@@ -49,15 +59,23 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
             catalogAdapter.submitList(list.toList())
             mBinding.tvCatalogExpand.text = getCatalogText()
         }
-
+        catalogAdapter.onTabItemSelectedListener = object : CatalogAdapter.OnTabItemSelectedListener {
+            override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
+                if (mBinding.smartRefreshLayout.autoRefreshAnimationOnly()) {
+                    mBinding.tvCatalogExpand.text = getCatalogText()
+                    loadData(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
+                } else {
+                    showToast(resId = R.string.still_loading)
+                }
+            }
+        }
         bangumiAdapter = BangumiAdapter2(this, ViewHolderType.BANGUMI_COVER_2)
         viewModel.mBangumiCoverList.observe(this) { list -> bangumiAdapter.submitList(list) }
-
-        emptyAdapter = EmptyAdapter()
 
         mBinding.apply {
             titleBar.ibLeftIcon.setOnClickListener { finish() }
             titleBar.tvTitle.text = getString(R.string.catalog)
+            titleBar.tvTitle.setOnClickListener { showBottomDataSourceDialog() }
             titleBar.tvRight.visible()
 
             rvCatalog.layoutManager = LinearLayoutManager(this@CatalogActivity)
@@ -88,16 +106,6 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
     }
 
     private fun initListener() {
-        catalogAdapter.onTabItemSelectedListener = object : CatalogAdapter.OnTabItemSelectedListener {
-            override fun onTabItemSelected(catalogTagPosition: Int, tabItemPosition: Int) {
-                if (mBinding.smartRefreshLayout.autoRefreshAnimationOnly()) {
-                    mBinding.tvCatalogExpand.text = getCatalogText()
-                    loadData(viewModel.getCatalogUrl(catalogTagPosition, tabItemPosition))
-                } else {
-                    showToast(resId = R.string.still_loading)
-                }
-            }
-        }
 
 
         mBinding.run {
@@ -124,16 +132,19 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                 }
             })
         }
+    }
 
+    private fun initObserver() {
         viewModel.catalogState.observe(this) { state ->
             state.success {
                 mBinding.run {
                     smartRefreshLayout.setNoMoreData(it.data.isLastPage)
-                    smartRefreshLayout.finishRefresh(true)
                     if (!isInitialized) {
                         isInitialized = true
                         smartRefreshLayout.visible(true)
                         emptyView.hide()
+                    } else {
+                        smartRefreshLayout.finishRefresh(true)
                     }
 
                     if (it.data.bangumiCoverList.isEmpty()) {
@@ -179,7 +190,6 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
                 mBinding.smartRefreshLayout.finishLoadMore(false)
             }
         }
-
     }
 
     private fun loadData(url: String) {
@@ -200,6 +210,27 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
         }
         return selectedTagList.joinToString(separator = "·")
 
+    }
+
+    private fun showBottomDataSourceDialog() {
+        val dataSourceMap = DataSourceManager.getAllCatalogDataSource()
+        val context = ContextThemeWrapper(this, R.style.QMUI_Compat_NoActionBar)
+        val builder = QMUIBottomSheet.BottomListSheetBuilder(context)
+            .setSkinManager(QMUISkinManager.of("Theme.AnimeHunter.QMUI", context)).setGravityCenter(true)
+            .setTitle(getString(R.string.switch_catalog_data_source))
+            .setOnSheetItemClickListener { dialog, itemView, position, tag ->
+                dataSourceMap[tag]?.let {
+                    viewModel.setDataSource(it)
+                    reload()
+                }
+                dialog?.dismiss()
+            }
+
+        dataSourceMap.keys.forEach { dataSource ->
+            builder.addItem(dataSource)
+        }
+
+        builder.build().show()
     }
 
     @JavascriptInterface

@@ -1,6 +1,8 @@
 package com.zyl315.animehunter.repository.impls.agefans
 
+import android.content.Context
 import android.webkit.WebView
+import com.zyl315.animehunter.App
 import com.zyl315.animehunter.bean.BangumiCoverBean
 import com.zyl315.animehunter.bean.age.*
 import com.zyl315.animehunter.execption.IPCheckException
@@ -13,12 +15,16 @@ import com.zyl315.animehunter.repository.datasource.DataSourceManager.DataSource
 import com.zyl315.animehunter.repository.interfaces.RequestState
 import com.zyl315.animehunter.ui.widget.MyWebViewClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.lang.ref.WeakReference
+import java.net.SocketException
+import java.net.SocketTimeoutException
 import java.net.URLDecoder
 import java.util.concurrent.CountDownLatch
 
@@ -26,6 +32,12 @@ class AgeFansDataSource : AbstractDataSource() {
     private val mBangumiCoverList: MutableList<BangumiCoverBean> = mutableListOf()
     private var totalCount = 0
 
+    init {
+        BASE_URL = getLocalBaseUrl()
+        GlobalScope.launch {
+            checkHost()
+        }
+    }
 
     override fun getHost(): String = BASE_URL
 
@@ -35,7 +47,8 @@ class AgeFansDataSource : AbstractDataSource() {
         withContext(Dispatchers.IO) {
             kotlin.runCatching {
                 val response = MyOkHttpClient.getResponse(REFERRAL_URL)
-                BASE_URL = response.request.url.host
+                BASE_URL = "${response.request.url.scheme}://${response.request.url.host}"
+                saveLocalBaseUrl(BASE_URL)
             }
         }
     }
@@ -267,6 +280,7 @@ class AgeFansDataSource : AbstractDataSource() {
     }
 
     override suspend fun getHomeContent(): RequestState<HomeResultBean> {
+        var retryCount = 1
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
                 val doc = Jsoup.parse(MyOkHttpClient.getDoc(packUrl(BASE_URL)))
@@ -274,7 +288,12 @@ class AgeFansDataSource : AbstractDataSource() {
 
                 return@withContext RequestState.Success(resultBean)
             }.getOrElse {
-                return@withContext RequestState.Error(it)
+                if(it is SocketTimeoutException && retryCount > 0)  {
+                    retryCount--
+                    getHomeContent()
+                } else {
+                    return@withContext RequestState.Error(it)
+                }
             }
         }
     }
@@ -342,13 +361,15 @@ class AgeFansDataSource : AbstractDataSource() {
 //                this.description = infoList.getOrElse(8) { "" }
 //            }
 
-            mBangumiCoverList.add(BangumiCoverBean(DataSource.AGEFANS,
-                bangumiId,
-                title,
-                coverUrl,
-                infoList.getOrElse(0) { "" },
-                newName,
-                infoList.getOrElse(3) { "" }))
+            mBangumiCoverList.add(
+                BangumiCoverBean(DataSource.AGEFANS,
+                    bangumiId,
+                    title,
+                    coverUrl,
+                    infoList.getOrElse(0) { "" },
+                    newName,
+                    infoList.getOrElse(3) { "" })
+            )
         }
         return SearchResultBean(
             totalCount, page, totalCount == mBangumiCoverList.size, mBangumiCoverList
@@ -385,7 +406,9 @@ class AgeFansDataSource : AbstractDataSource() {
     }
 
     companion object {
-        var BASE_URL = "https://www.agemys.cc"
+        const val AGE_LOCAL = "age_local"
+        const val AGE_LOCAL_BASE_URL = "age_local_base_url"
+        var BASE_URL = "https://www.agemys.net"
         var REFERRAL_URL = "https://dx.mbn98.com/?u=http://age.tv/&p=/"
         var PLAY_URL = "/_getplay?aid=\$1&playindex=\$2&epindex=\$3"
         var DEFAULT_CATALOG_URL = "${BASE_URL}/catalog/all-all-all-all-all-time-1"
@@ -397,6 +420,16 @@ class AgeFansDataSource : AbstractDataSource() {
                 url.startsWith("/") -> "$BASE_URL$url"
                 else -> "$BASE_URL/$url"
             }
+        }
+
+        fun getLocalBaseUrl():String {
+            val sharedPreferences = App.context.getSharedPreferences(AGE_LOCAL, Context.MODE_PRIVATE)
+            return sharedPreferences.getString(AGE_LOCAL_BASE_URL,  "https://www.agemys.net").toString()
+        }
+
+        fun saveLocalBaseUrl(baseUrl:String) {
+            val sharedPreferences = App.context.getSharedPreferences(AGE_LOCAL, Context.MODE_PRIVATE)
+            sharedPreferences.edit().putString(AGE_LOCAL_BASE_URL, baseUrl).apply()
         }
     }
 }

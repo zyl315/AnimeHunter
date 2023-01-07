@@ -61,5 +61,5 @@ class CatalogShowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
 
 class CatalogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //    val tabName: TextView = itemView.findViewById(R.id.tv_tabName)
-    val tabLayout: TabLayout = itemView.findViewById(R.id.tab_layout)
+var tabLayout: TabLayout = itemView.findViewById(R.id.tab_layout)
 }

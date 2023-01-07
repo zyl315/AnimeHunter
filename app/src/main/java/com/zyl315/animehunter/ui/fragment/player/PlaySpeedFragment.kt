@@ -15,7 +15,7 @@ import com.zyl315.animehunter.ui.fragment.PopupFragment
 class PlaySpeedFragment : PopupFragment<FragmentPlaySpeedBinding>() {
     var currentSpeed: Float = 1.0f
 
-    private val speedList: MutableList<Float> = mutableListOf(0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f)
+    private val speedList: MutableList<Float> = mutableListOf(0.5f, 0.75f, 1.0f, 1.25F, 1.5f, 2.0f, 3.0f)
     var onClick: ((Float) -> Unit)? = null
     override var popupGravity: Int = Gravity.END
 
