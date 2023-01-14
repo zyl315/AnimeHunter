@@ -31,7 +31,7 @@ class CatalogActivity : BaseActivity<ActivityCatalogBinding>() {
     lateinit var webView: WebView
     lateinit var catalogAdapter: CatalogAdapter
     lateinit var bangumiAdapter: BangumiAdapter2
-    lateinit var emptyAdapter: EmptyAdapter
+    private var emptyAdapter: EmptyAdapter = EmptyAdapter()
     private var isInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

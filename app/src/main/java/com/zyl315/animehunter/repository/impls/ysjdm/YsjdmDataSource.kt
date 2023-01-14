@@ -102,7 +102,15 @@ class YsjdmDataSource : AbstractDataSource() {
                     }
                     catalogList.add(catalogTagBean)
                 }
-
+                val sxTitle = doc.select("div.sx_title2").first()?.text()
+                val catalogTagType = CatalogTagBean("目录类型")
+                catalogTagType.catalogItemBeanList.addAll(
+                    listOf(
+                        CatalogItemBean("新番", html.replace("id/\\d\\d".toRegex(), "id/22"), sxTitle.equals("新番") ),
+                        CatalogItemBean("完结", html.replace("id/\\d\\d".toRegex(), "id/20"), sxTitle.equals("完结") )
+                    )
+                )
+                catalogList.add(catalogTagType)
                 val searchResultBean = processBangumiHtml(doc, page)
                 searchResultBean.catalogTagList = catalogList
                 return@withContext RequestState.Success(searchResultBean)
@@ -169,10 +177,12 @@ class YsjdmDataSource : AbstractDataSource() {
 
     fun getEncryptedPlayUrl(url: String): String {
         val doc = Jsoup.parse(MyOkHttpClient.getDoc(ENCRYPTED_URL + url, mapOf("Referer" to BASE_URL)))
-        val jsonStr = Regex("\"id\":.*\"").find(doc.select("body script")[0].html())!!.value
-        val jsonObj = JSONObject("{$jsonStr}")
-        val id = jsonObj.getString("id")
-        return "https://bf3.sbdm.cc/runtime/Aliyun/${id}.m3u8"
+        val urlStr = Regex("\\(\".*\"\\)").find(doc.select("body script")[0].html())!!.value
+        var ivParam = doc.select("head script[type!=text/javascript]").first()
+            ?.let { Regex("\"[0-9a-z]*\"").find(it.html()) }!!.value
+        ivParam = ivParam.replace("\"", "");
+        val encrypt = urlStr.replace("(^\\(\")|(\"\\)\$)".toRegex(), "");
+        return AESCrypt.decrypt(encrypt, SECRET_KEY, ivParam)
     }
 
     override fun getCatalogUrl(url: String): String {
@@ -210,10 +220,10 @@ class YsjdmDataSource : AbstractDataSource() {
     }
 
     companion object {
-        var BASE_URL = "https://www.gqdm.net"
-        var DEFAULT_CATALOG_URL = "${BASE_URL}/index.php/vod/show/id/20.html"
-        var BASE_SOURCE_URL = "https://bf.sbdm.cc/"
+        var BASE_URL = "https://www.sbdm.net"
+        var DEFAULT_CATALOG_URL = "${BASE_URL}/index.php/vod/show/id/22.html"
         var ENCRYPTED_URL = "https://bf.sbdm.cc/m3u8.php?url="
+        var SECRET_KEY= "A42EAC0C2B408472"
 
         fun packUrl(url: String): String {
             return when {
